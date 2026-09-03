@@ -1,50 +1,75 @@
-# CareerAxis Academy — Website
+# CareerAxis Academy — Full Website Platform
 
-Single-page, bilingual (English/Telugu) site for the CareerAxis Academy YouTube channel.
-Plain HTML/CSS/JS — no build step, no framework, no server. Free to host, near-zero maintenance.
+Domain: https://careeraxisacademy.in
 
-## Before you publish — replace these placeholders
+## Frontend included
+- Premium responsive CareerAxis design inspired by the supplied reference screenshot
+- English + Telugu language switch
+- Home / Courses / Course details / Resources / About / Contact
+- Student signup/login demo
+- Student dashboard
+- Course enrollment
+- YouTube lesson embeds
+- Lesson progress tracking
+- FAQ
+- YouTube / Instagram / Telegram integration points
+- Mobile responsive navigation
+- GitHub Pages CNAME for careeraxisacademy.in
 
-In `index.html`, search for and update:
+## Social links
+Open `site-config.js` and paste your real:
+- YouTube URL
+- Instagram URL
+- Telegram URL
 
-1. `YOUR_CHANNEL_HANDLE` (appears 3 times) → your actual YouTube handle, e.g. `@CareerAxisAcademy`
-2. `YOUR_CHANNEL_ID` → your YouTube channel ID, so the embedded player shows your latest uploads.
-   Find it at https://www.youtube.com/account_advanced while logged into your channel.
-3. `YOUR_FORM_ID` → create a free form at https://formspree.io (free tier: 50 submissions/month),
-   then paste the form ID it gives you.
-4. The two `href="#"` placeholders in the footer → your LinkedIn and Instagram links (or delete those lines).
+The UI will automatically show the links after you add them.
 
-## Run it locally
+## Important production note
+The included authentication is browser-only demo mode using localStorage.
+Do NOT use it to protect paid content or collect real student passwords.
 
-No build tools needed. Just open `index.html` in a browser, or serve it:
+For production:
+1. Create a Supabase project.
+2. Run `supabase-schema.sql`.
+3. Configure Supabase Auth.
+4. Replace the demo auth/data calls in `script.js` with Supabase queries.
+5. Add Row Level Security policies.
+6. Add server-side payment verification before accepting paid enrollments.
+7. Never place Supabase `service_role` keys in frontend code.
 
-```bash
-python3 -m http.server 8000
-# then visit http://localhost:8000
-```
+## GitHub Pages
+Keep `CNAME` in the repository root:
+careeraxisacademy.in
 
-## Publish for free (Cloudflare Pages)
+In GitHub:
+Settings → Pages → Deploy from branch → main → / (root)
 
-1. Push this folder to a GitHub repo (see commands below).
-2. Go to https://dash.cloudflare.com → Pages → Create a project → Connect to Git.
-3. Select the repo. Build settings: leave build command blank, output directory `/`.
-4. Deploy — you'll get a free `*.pages.dev` URL immediately.
-5. Later, add a custom domain (e.g. `careeraxisacademy.com`) for ~$9-12/year via Cloudflare Registrar,
-   under Pages → your project → Custom domains. SSL is automatic.
+Then set Custom domain to:
+careeraxisacademy.in
 
-Every future `git push` redeploys the live site automatically — that's the only maintenance step.
+## GoDaddy DNS for GitHub Pages
+At GoDaddy DNS, use:
+A @ 185.199.108.153
+A @ 185.199.109.153
+A @ 185.199.110.153
+A @ 185.199.111.153
 
-## Push to GitHub
+CNAME www RAVI25251.github.io
 
-```bash
-cd careeraxis-site
-git init
-git add .
-git commit -m "Initial CareerAxis Academy website"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<your-repo-name>.git
-git push -u origin main
-```
+Remove conflicting A/AAAA/CNAME records for the same host, but do not remove MX records used for email.
 
-(Create the empty repo first at https://github.com/new — don't initialize it with a README there,
-to avoid a merge conflict with this one.)
+After DNS and certificate provisioning, enable Enforce HTTPS.
+
+## Next production modules
+- Supabase Auth + profiles
+- Admin dashboard
+- Instructor dashboard
+- Real course CRUD
+- Real progress sync
+- Quizzes and question bank
+- Certificates
+- Razorpay/payment integration
+- Email notifications
+- Student support/tickets
+- Search engine SEO pages
+- Privacy policy / Terms / Refund policy

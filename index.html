@@ -1,159 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareerAxis Academy | Knowledge to Success</title>
-<meta name="description" content="Career and job guidance in English and Telugu — resume tips, interview prep, and skill-building from CareerAxis Academy.">
-<link rel="icon" type="image/png" href="assets/favicon.png">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CareerAxis Academy | Knowledge to Success</title>
+  <meta name="description" content="CareerAxis Academy — practical career guidance, courses, resources and learning in English and Telugu.">
+  <meta name="theme-color" content="#07172f">
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-  <div class="wrap">
-    <div class="brand">
-      <img src="assets/logo.png" alt="CareerAxis Academy logo">
-      <div class="brand-text">
-        CareerAxis Academy
-        <small data-lang="en">Knowledge to Success</small>
-        <small data-lang="te">నాలెడ్జ్ టు సక్సెస్ </small>
-      </div>
-    </div>
-
-    <button class="menu-btn" id="menuBtn" aria-label="Menu">&#9776;</button>
-
-    <nav>
-      <ul id="navList">
-        <li><a href="#about" data-lang="en">About</a><a href="#about" data-lang="te">మా గురించి</a></li>
-        <li><a href="#videos" data-lang="en">Videos</a><a href="#videos" data-lang="te">వీడియోలు</a></li>
-        <li><a href="#subscribe" data-lang="en">Subscribe</a><a href="#subscribe" data-lang="te">సబ్‌స్క్రైబ్</a></li>
-        <li><button class="lang-toggle" id="langToggle">తెలుగు / EN</button></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-<section class="hero">
-  <div class="wrap">
-    <h1>
-      <span data-lang="en">Career<span class="gold">Axis</span> Academy</span>
-      <span data-lang="te">కెరీర్<span class="gold">యాక్సిస్</span> అకాడమీ</span>
-    </h1>
-    <p class="tagline">
-      <span data-lang="en">Knowledge to Success</span>
-      <span data-lang="te">నాలెడ్జ్ టు సక్సెస్</span>
-    </p>
-    <p class="sub" data-lang="en">
-      Career and job guidance in English and Telugu — resume building, interview preparation,
-      and practical skills to help you land the job you want.
-    </p>
-    <p class="sub" data-lang="te">
-      ఇంగ్లీష్ మరియు తెలుగు భాషలలో కెరీర్, జాబ్ మార్గదర్శకత్వం — రెజ్యూమె తయారీ, ఇంటర్వ్యూ ప్రిపరేషన్,
-      మరియు మీకు కావలసిన ఉద్యోగం సాధించడానికి ఆచరణాత్మక నైపుణ్యాలు.
-    </p>
-    <div class="btn-row">
-      <a class="btn btn-gold" href="https://www.youtube.com/@YOUR_CHANNEL_HANDLE" target="_blank" rel="noopener">
-        <span data-lang="en">Watch on YouTube</span>
-        <span data-lang="te">యూట్యూబ్‌లో చూడండి</span>
-      </a>
-      <a class="btn btn-outline" href="#subscribe">
-        <span data-lang="en">Get Updates</span>
-        <span data-lang="te">అప్‌డేట్‌లు పొందండి</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<section id="about">
-  <div class="wrap">
-    <h2 class="section-title" data-lang="en">What You'll Learn</h2>
-    <h2 class="section-title" data-lang="te">మీరు నేర్చుకునేవి</h2>
-    <p class="section-sub" data-lang="en">Practical, no-fluff career content for job seekers and professionals at every stage.</p>
-    <p class="section-sub" data-lang="te">ప్రతి దశలో ఉద్యోగార్థులు మరియు నిపుణుల కోసం ఆచరణాత్మక కెరీర్ కంటెంట్.</p>
-
-    <div class="pillars">
-      <div class="pillar">
-        <div class="icon">📄</div>
-        <h3 data-lang="en">Resume &amp; LinkedIn</h3>
-        <h3 data-lang="te">రెజ్యూమె &amp; లింక్డ్‌ఇన్</h3>
-        <p data-lang="en">Build a resume and profile that actually gets noticed by recruiters.</p>
-        <p data-lang="te">రిక్రూటర్ల దృష్టిని ఆకర్షించే రెజ్యూమె మరియు ప్రొఫైల్ తయారు చేయండి.</p>
-      </div>
-      <div class="pillar">
-        <div class="icon">🎯</div>
-        <h3 data-lang="en">Interview Preparation</h3>
-        <h3 data-lang="te">ఇంటర్వ్యూ ప్రిపరేషన్</h3>
-        <p data-lang="en">Confidently answer the questions that decide whether you get the offer.</p>
-        <p data-lang="te">ఆఫర్ వస్తుందా లేదా అని నిర్ణయించే ప్రశ్నలకు నమ్మకంగా సమాధానం ఇవ్వండి.</p>
-      </div>
-      <div class="pillar">
-        <div class="icon">📈</div>
-        <h3 data-lang="en">Career Growth</h3>
-        <h3 data-lang="te">కెరీర్ వృద్ధి</h3>
-        <p data-lang="en">Skill-building and workplace strategy to move up, not just get in.</p>
-        <p data-lang="te">కేవలం ఉద్యోగం పొందడమే కాదు, ఎదగడానికి నైపుణ్యాలు మరియు వ్యూహాలు.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="videos" id="videos">
-  <div class="wrap">
-    <h2 class="section-title" data-lang="en">Latest from the Channel</h2>
-    <h2 class="section-title" data-lang="te">ఛానెల్ నుండి తాజా వీడియోలు</h2>
-    <p class="section-sub" data-lang="en">New career and job videos every week, in English and Telugu.</p>
-    <p class="section-sub" data-lang="te">ప్రతి వారం కొత్త కెరీర్ మరియు జాబ్ వీడియోలు, ఇంగ్లీష్ మరియు తెలుగులో.</p>
-
-    <!-- Replace YOUR_CHANNEL_ID below with your actual YouTube channel ID
-         to auto-embed your latest uploads playlist. -->
-    <div class="video-embed-wrap">
-      <iframe
-        src="https://www.youtube.com/embed?listType=user_uploads&list=YOUR_CHANNEL_ID"
-        title="CareerAxis Academy latest videos"
-        allow="accelerate-compute; autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-    </div>
-
-    <div class="videos-cta">
-      <a class="btn btn-gold" href="https://www.youtube.com/@YOUR_CHANNEL_HANDLE" target="_blank" rel="noopener">
-        <span data-lang="en">See All Videos</span>
-        <span data-lang="te">అన్ని వీడియోలు చూడండి</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<section class="subscribe" id="subscribe">
-  <div class="wrap">
-    <h2 class="section-title" data-lang="en">Never Miss an Upload</h2>
-    <h2 class="section-title" data-lang="te">ఏ అప్‌లోడ్‌ని మిస్ కాకండి</h2>
-    <p class="section-sub" data-lang="en">Get career tips and new video alerts straight to your inbox.</p>
-    <p class="section-sub" data-lang="te">కెరీర్ చిట్కాలు మరియు కొత్త వీడియో అలర్ట్‌లు నేరుగా మీ ఇన్‌బాక్స్‌కు పొందండి.</p>
-
-    <!-- Uses Formspree free tier — replace YOUR_FORM_ID after creating a free form at formspree.io -->
-    <form class="subscribe-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-      <input type="email" name="email" placeholder="your@email.com" required>
-      <button class="btn btn-gold" type="submit">
-        <span data-lang="en">Subscribe</span>
-        <span data-lang="te">సబ్‌స్క్రైబ్</span>
-      </button>
-    </form>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="social">
-      <a href="https://www.youtube.com/@YOUR_CHANNEL_HANDLE" target="_blank" rel="noopener" aria-label="YouTube">YouTube</a>
-      <a href="#" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
-      <a href="#" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
-    </div>
-    <p data-lang="en">&copy; <span id="year-en"></span> CareerAxis Academy. All rights reserved.</p>
-    <p data-lang="te">&copy; <span id="year-te"></span> కెరీర్‌యాక్సిస్ అకాడమీ. అన్ని హక్కులు ప్రత్యేకించబడ్డాయి.</p>
-  </div>
-</footer>
-
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script src="site-config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

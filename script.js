@@ -1,31 +1,107 @@
-// Language toggle — remembers the visitor's choice in localStorage
-(function () {
-  const body = document.body;
-  const toggleBtn = document.getElementById('langToggle');
-  const saved = localStorage.getItem('ca_lang');
-
-  if (saved === 'te') {
-    body.classList.add('lang-te');
-  }
-
-  toggleBtn.addEventListener('click', function () {
-    body.classList.toggle('lang-te');
-    const current = body.classList.contains('lang-te') ? 'te' : 'en';
-    localStorage.setItem('ca_lang', current);
-    document.documentElement.lang = current;
-  });
-
-  // Mobile menu
-  const menuBtn = document.getElementById('menuBtn');
-  const navList = document.getElementById('navList');
-  menuBtn.addEventListener('click', function () {
-    navList.classList.toggle('open');
-  });
-
-  // Footer year
-  const year = new Date().getFullYear();
-  const yEn = document.getElementById('year-en');
-  const yTe = document.getElementById('year-te');
-  if (yEn) yEn.textContent = year;
-  if (yTe) yTe.textContent = year;
-})();
+/* CareerAxis Academy front-end application.
+   Demo data works without a backend. If Supabase values are added to site-config.js,
+   the site is ready for the next integration phase. */
+const CFG=window.CAREERAXIS_CONFIG||{};
+const T={
+en:{
+home:"Home",courses:"Courses",resources:"Resources",about:"About",contact:"Contact",login:"Login",join:"Join Academy",
+heroEyebrow:"CAREER-FOCUSED EDUCATION",heroTitle:"Turn <span>Knowledge</span> into Career Success.",
+heroText:"Career and job guidance in English and Telugu — resume building, interview preparation, practical skills and structured learning to help you reach your career goals.",
+watch:"Watch on YouTube",updates:"Get Updates",learn:"What You'll Learn",learnSub:"Practical, no-fluff career content for students, job seekers and professionals at every stage.",
+featured:"Featured Courses",featuredSub:"Build job-ready skills with structured courses, projects and assessments.",viewAll:"View All Courses",
+why:"Why CareerAxis",whyTitle:"A learning system built around outcomes.",whySub:"Learn, practice, track progress and move confidently toward your next opportunity.",
+learnCard:"Learn",buildCard:"Build",growCard:"Grow",learnDesc:"Understand fundamentals through structured lessons.",buildDesc:"Practice with exercises and projects that reinforce learning.",growDesc:"Turn skills into confidence and career opportunities.",
+latest:"Latest Updates",latestSub:"Follow our channels for new videos, resources, job alerts and career tips.",
+aboutTitle:"Knowledge to Success.",aboutText:"CareerAxis Academy makes career-focused learning simple, practical and accessible. We help learners understand concepts, apply them through practice and move toward their career goals.",
+contactTitle:"Contact CareerAxis",contactText:"Have a course question or partnership idea? Send us a message.",
+name:"Full name",email:"Email",message:"Message",send:"Send Message",welcome:"Welcome back",studentLogin:"Student Login",create:"Create Student Account",
+dashboard:"Dashboard",logout:"Logout",browse:"Browse Courses",myLearning:"My Learning",enrolled:"Enrolled courses",progress:"Average progress",account:"Account",
+explore:"Explore Courses",search:"Search courses...",all:"All categories",courseAccess:"Course Access",enroll:"Enroll Now",loginEnroll:"Login to Enroll",
+lessons:"lessons",continue:"Continue",complete:"Complete",completed:"complete",back:"Back to courses",resourcesTitle:"Learning Resources",
+faq:"Frequently Asked Questions",noCourses:"No courses found.",demoNotice:"Demo mode: account data is stored only in this browser. Connect Supabase before using real student accounts.",
+}
+,
+te:{
+home:"హోమ్",courses:"కోర్సులు",resources:"వనరులు",about:"మా గురించి",contact:"సంప్రదించండి",login:"లాగిన్",join:"అకాడమీలో చేరండి",
+heroEyebrow:"కెరీర్ ఆధారిత విద్య",heroTitle:"<span>జ్ఞానాన్ని</span> కెరీర్ విజయంగా మార్చుకోండి.",
+heroText:"ఇంగ్లీష్ మరియు తెలుగులో కెరీర్ & ఉద్యోగ మార్గదర్శకం — రెజ్యూమ్, ఇంటర్వ్యూ ప్రిపరేషన్, ప్రాక్టికల్ స్కిల్స్ మరియు స్ట్రక్చర్డ్ లెర్నింగ్.",
+watch:"YouTube చూడండి",updates:"అప్‌డేట్స్ పొందండి",learn:"మీరు ఏమి నేర్చుకుంటారు",learnSub:"విద్యార్థులు, ఉద్యోగార్థులు మరియు ప్రొఫెషనల్స్ కోసం ప్రాక్టికల్ కెరీర్ కంటెంట్.",
+featured:"ప్రధాన కోర్సులు",featuredSub:"స్ట్రక్చర్డ్ కోర్సులు, ప్రాజెక్టులు మరియు అసెస్‌మెంట్స్‌తో ఉద్యోగానికి అవసరమైన నైపుణ్యాలను పెంచుకోండి.",viewAll:"అన్ని కోర్సులు చూడండి",
+why:"CareerAxis ఎందుకు",whyTitle:"ఫలితాలపై దృష్టి పెట్టిన లెర్నింగ్ సిస్టమ్.",whySub:"నేర్చుకోండి, ప్రాక్టీస్ చేయండి, ప్రోగ్రెస్ ట్రాక్ చేయండి మరియు మీ తదుపరి అవకాశానికి సిద్ధం అవ్వండి.",
+learnCard:"నేర్చుకోండి",buildCard:"నిర్మించండి",growCard:"ఎదగండి",learnDesc:"స్ట్రక్చర్డ్ లెసన్స్ ద్వారా ప్రాథమిక అంశాలను నేర్చుకోండి.",buildDesc:"ఎక్సర్సైజ్‌లు మరియు ప్రాజెక్టులతో ప్రాక్టీస్ చేయండి.",growDesc:"స్కిల్స్‌ను కెరీర్ అవకాశాలుగా మార్చుకోండి.",
+latest:"తాజా అప్‌డేట్స్",latestSub:"కొత్త వీడియోలు, వనరులు, జాబ్ అలర్ట్స్ మరియు కెరీర్ టిప్స్ కోసం మా ఛానల్స్‌ను ఫాలో అవ్వండి.",
+aboutTitle:"జ్ఞానం నుండి విజయం.",aboutText:"CareerAxis Academy కెరీర్ ఆధారిత లెర్నింగ్‌ను సులభంగా, ప్రాక్టికల్‌గా మరియు అందరికీ అందుబాటులో ఉండేలా చేస్తుంది.",
+contactTitle:"CareerAxis ను సంప్రదించండి",contactText:"కోర్సు ప్రశ్న లేదా భాగస్వామ్య ఆలోచన ఉందా? మాకు మెసేజ్ పంపండి.",
+name:"పూర్తి పేరు",email:"ఈమెయిల్",message:"సందేశం",send:"సందేశం పంపండి",welcome:"మళ్లీ స్వాగతం",studentLogin:"స్టూడెంట్ లాగిన్",create:"స్టూడెంట్ అకౌంట్ సృష్టించండి",
+dashboard:"డ్యాష్‌బోర్డ్",logout:"లాగ్ అవుట్",browse:"కోర్సులు చూడండి",myLearning:"నా లెర్నింగ్",enrolled:"ఎన్‌రోల్ చేసిన కోర్సులు",progress:"సగటు ప్రోగ్రెస్",account:"అకౌంట్",
+explore:"కోర్సులను చూడండి",search:"కోర్సుల కోసం వెతకండి...",all:"అన్ని కేటగిరీలు",courseAccess:"కోర్సు యాక్సెస్",enroll:"ఇప్పుడే ఎన్‌రోల్ అవ్వండి",loginEnroll:"ఎన్‌రోల్ చేయడానికి లాగిన్ అవ్వండి",
+lessons:"లెసన్స్",continue:"కొనసాగించండి",complete:"పూర్తి చేయండి",completed:"పూర్తి",back:"కోర్సులకు తిరిగి వెళ్లండి",resourcesTitle:"లెర్నింగ్ వనరులు",
+faq:"తరచుగా అడిగే ప్రశ్నలు",noCourses:"కోర్సులు కనుగొనబడలేదు.",demoNotice:"డెమో మోడ్: అకౌంట్ డేటా ఈ బ్రౌజర్‌లో మాత్రమే నిల్వ అవుతుంది. నిజమైన స్టూడెంట్ అకౌంట్స్ కోసం Supabase కనెక్ట్ చేయండి."
+}};
+let lang=localStorage.getItem("ca_lang")||"en";
+const courses=[
+{id:1,title:"Cybersecurity Fundamentals",te:"సైబర్‌సెక్యూరిటీ ఫండమెంటల్స్",cat:"Cybersecurity",level:"Beginner",lessons:12,price:999,icon:"🛡️",desc:"Security fundamentals, threats, controls and practical defensive concepts.",video:"dQw4w9WgXcQ"},
+{id:2,title:"Python for Beginners",te:"పైథాన్ ఫర్ బిగినర్స్",cat:"Programming",level:"Beginner",lessons:18,price:799,icon:"🐍",desc:"Build a strong Python foundation with hands-on exercises and mini projects.",video:"rfscVS0vtbw"},
+{id:3,title:"Cloud & DevOps Essentials",te:"క్లౌడ్ & DevOps ఎసెన్షియల్స్",cat:"Cloud",level:"Intermediate",lessons:15,price:1499,icon:"☁️",desc:"Cloud concepts, Linux, containers, CI/CD and DevOps workflows.",video:"M988_fsOSWo"},
+{id:4,title:"Interview & Career Mastery",te:"ఇంటర్వ్యూ & కెరీర్ మాస్టరీ",cat:"Career",level:"All levels",lessons:10,price:499,icon:"🎯",desc:"Resume, LinkedIn, interview preparation and practical job-search strategy.",video:"HG68Ymazo18"},
+{id:5,title:"Web Development Bootcamp",te:"వెబ్ డెవలప్‌మెంట్ బూట్‌క్యాంప్",cat:"Development",level:"Beginner",lessons:24,price:1999,icon:"💻",desc:"HTML, CSS and JavaScript from fundamentals to a responsive project.",video:"PkZNo7MFNFg"},
+{id:6,title:"Data Analytics Starter",te:"డేటా అనలిటిక్స్ స్టార్టర్",cat:"Data",level:"Beginner",lessons:16,price:1299,icon:"📊",desc:"Spreadsheets, SQL, analytics thinking and dashboard fundamentals.",video:"r-uOLxNrNk8"}];
+const resources=[
+["📄","Resume Templates","ATS-friendly resume structure, checklists and examples.","#"],
+["🎯","Interview Checklist","Preparation checklist for technical and HR interviews.","#"],
+["🧠","Learning Roadmaps","Beginner-friendly roadmaps for technology and career skills.","#"],
+["💼","Job Search Guide","Practical guidance for LinkedIn, applications and follow-ups.","#"],
+["📊","Skill Trackers","Track what you know, what you practice and what to learn next.","#"],
+["📚","Free Learning List","Curated free learning resources to supplement your courses.","#"]];
+let user=JSON.parse(localStorage.getItem("ca_user")||"null");
+let enrolled=JSON.parse(localStorage.getItem("ca_enrolled")||"[]");
+let prog=JSON.parse(localStorage.getItem("ca_progress")||"{}");
+const tr=k=>T[lang][k]||T.en[k]||k;
+function save(){localStorage.setItem("ca_user",JSON.stringify(user));localStorage.setItem("ca_enrolled",JSON.stringify(enrolled));localStorage.setItem("ca_progress",JSON.stringify(prog));localStorage.setItem("ca_lang",lang)}
+function toast(m){let x=document.getElementById("toast");x.textContent=m;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2500)}
+function go(p){location.hash=p}
+function safe(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function courseName(c){return lang==="te"?c.te:c.title}
+function isEn(id){return enrolled.includes(Number(id))}
+function socialLinks(){
+const s=CFG.social||{};let out=[];
+if(s.youtube)out.push(`<a class="social" target="_blank" rel="noopener" href="${s.youtube}">▶ YouTube</a>`);
+if(s.instagram)out.push(`<a class="social" target="_blank" rel="noopener" href="${s.instagram}">◎ Instagram</a>`);
+if(s.telegram)out.push(`<a class="social" target="_blank" rel="noopener" href="${s.telegram}">✈ Telegram</a>`);
+return out.join("")||`<span class="small">Add your YouTube, Instagram and Telegram URLs in site-config.js</span>`;
+}
+function nav(){
+return `<div class="topbar"><div class="container topbar-inner"><span>${lang==="te"?"ఇంగ్లీష్ & తెలుగు కెరీర్ లెర్నింగ్":"English & Telugu career learning"}</span><span>${CFG.email||"hello@careeraxisacademy.in"}</span></div></div>
+<nav class="nav" id="nav"><div class="container nav-inner">
+<a class="brand" href="#/"><img src="assets/logo.png"><span class="brand-name">Career<span>Axis</span> Academy<small class="brand-sub">KNOWLEDGE TO SUCCESS</small></span></a>
+<div class="nav-links"><a href="#/">${tr("home")}</a><a href="#/courses">${tr("courses")}</a><a href="#/resources">${tr("resources")}</a><a href="#/about">${tr("about")}</a><a href="#/contact">${tr("contact")}</a></div>
+<div class="nav-actions"><button class="lang" onclick="toggleLang()">తెలుగు / EN</button>${user?`<a class="btn btn-light" href="#/dashboard">${tr("dashboard")}</a><button class="btn btn-primary" onclick="logout()">${tr("logout")}</button>`:`<a class="btn btn-light" href="#/login">${tr("login")}</a><a class="btn btn-gold" href="#/signup">${tr("join")}</a>`}</div>
+<button class="mobile-menu" onclick="document.getElementById('nav').classList.toggle('mobile-nav-open')">☰</button>
+</div></nav>`;
+}
+function footer(){return `<div class="social-strip"><div class="container socials">${socialLinks()}</div></div><footer class="footer"><div class="container footer-grid"><div><a class="brand" href="#/"><img src="assets/logo.png"><span class="brand-name">Career<span>Axis</span> Academy<small class="brand-sub">KNOWLEDGE TO SUCCESS</small></span></a><p style="margin-top:14px;font-size:13px">${lang==="te"?"నేర్చుకోండి • ఎదగండి • నాయకత్వం వహించండి":"Learn • Grow • Lead"}</p></div><div><h4>${tr("courses")}</h4><a href="#/courses">${tr("explore")}</a><a href="#/resources">${tr("resources")}</a></div><div><h4>${tr("dashboard")}</h4><a href="#/login">${tr("login")}</a><a href="#/signup">${tr("join")}</a></div><div><h4>Connect</h4>${socialLinks()}<a href="mailto:${CFG.email||"hello@careeraxisacademy.in"}">Email</a></div></div><div class="container copyright">© ${new Date().getFullYear()} CareerAxis Academy. All rights reserved.</div></footer>`}
+function layout(content){return nav()+content+footer()}
+function home(){
+return layout(`<main><section class="hero"><div class="container hero-grid"><div><div class="eyebrow">${tr("heroEyebrow")}</div><h1>${tr("heroTitle")}</h1><p>${tr("heroText")}</p><div class="hero-buttons"><a class="btn btn-gold" href="#/courses">${tr("explore")} →</a>${CFG.social?.youtube?`<a class="btn btn-outline" target="_blank" href="${CFG.social.youtube}">${tr("watch")}</a>`:`<a class="btn btn-outline" href="#/resources">${tr("resources")}</a>`}</div></div><div class="hero-art"><div class="hero-card"><img src="assets/logo.png"><div class="mini-stats"><div class="mini-stat"><b>6+</b><span>${tr("courses")}</span></div><div class="mini-stat"><b>EN / TE</b><span>Languages</span></div><div class="mini-stat"><b>24/7</b><span>Learning</span></div></div></div></div></div></section>
+<section class="section cream"><div class="container"><div class="section-head"><div><div class="eyebrow gold-text">${tr("learn")}</div><h2>${tr("featured")}</h2></div><p>${tr("featuredSub")}</p></div><div class="cards">${courses.slice(0,3).map(card).join("")}</div><div style="text-align:center;margin-top:28px"><a class="btn btn-primary" href="#/courses">${tr("viewAll")}</a></div></div></section>
+<section class="section"><div class="container"><div class="section-head"><div><div class="eyebrow gold-text">${tr("why")}</div><h2>${tr("whyTitle")}</h2></div><p>${tr("whySub")}</p></div><div class="features"><div class="feature"><div class="icon">🎓</div><h3>${tr("learnCard")}</h3><p>${tr("learnDesc")}</p></div><div class="feature"><div class="icon">🛠️</div><h3>${tr("buildCard")}</h3><p>${tr("buildDesc")}</p></div><div class="feature"><div class="icon">🚀</div><h3>${tr("growCard")}</h3><p>${tr("growDesc")}</p></div></div></div></section>
+<section class="section dark"><div class="container"><div class="section-head"><div><div class="eyebrow">${tr("latest")}</div><h2>${tr("latest")}</h2></div><p>${tr("latestSub")}</p></div><div class="quotes"><div class="quote"><p>🎥 ${lang==="te"?"కొత్త కెరీర్ వీడియోలు మరియు టెక్ కంటెంట్.":"New career videos and practical technology content."}</p><b>YouTube</b></div><div class="quote"><p>📢 ${lang==="te"?"తాజా జాబ్ అప్‌డేట్స్ మరియు నోటిఫికేషన్స్.":"Job updates, alerts and quick career notifications."}</p><b>Telegram</b></div><div class="quote"><p>📸 ${lang==="te"?"షార్ట్ టిప్స్, రీల్స్ మరియు డైలీ లెర్నింగ్.":"Short tips, reels and daily learning snippets."}</p><b>Instagram</b></div></div><div style="text-align:center;margin-top:28px"><div class="socials">${socialLinks()}</div></div></div></section></main>`);
+}
+function card(c){return `<article class="course-card"><div class="course-cover"><span class="tag">${c.cat}</span><div class="course-icon">${c.icon}</div></div><div class="course-body"><h3>${safe(courseName(c))}</h3><p>${safe(c.desc)}</p><div class="meta"><span>${c.lessons} ${tr("lessons")}</span><span>${c.level}</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span class="price">₹${c.price.toLocaleString("en-IN")}</span><a class="btn btn-primary" href="#/course/${c.id}">${lang==="te"?"వివరాలు":"View Course"}</a></div></div></article>`}
+function coursesPage(){return layout(`<main class="page"><div class="container"><div class="section-head"><div><div class="eyebrow gold-text">${tr("courses")}</div><h1>${tr("featured")}</h1></div><p>${tr("featuredSub")}</p></div><div class="panel" style="margin-bottom:20px"><div class="search-row"><input id="q" placeholder="${tr("search")}" oninput="filterCourses()"><select id="cat" onchange="filterCourses()"><option value="">${tr("all")}</option>${[...new Set(courses.map(c=>c.cat))].map(x=>`<option>${x}</option>`).join("")}</select></div></div><div id="grid" class="cards">${courses.map(card).join("")}</div></div></main>`)}
+function filterCourses(){let q=(document.getElementById("q")?.value||"").toLowerCase(),cat=document.getElementById("cat")?.value||"";let list=courses.filter(c=>(!q||(`${c.title} ${c.te} ${c.desc}`.toLowerCase().includes(q)))&&(!cat||c.cat===cat));document.getElementById("grid").innerHTML=list.map(card).join("")||`<div class="empty">${tr("noCourses")}</div>`}
+function coursePage(id){let c=courses.find(x=>x.id===Number(id));if(!c)return layout(`<main class="page"><div class="container empty"><h2>Course not found</h2></div></main>`);let en=isEn(c.id),p=prog[c.id]||0;return layout(`<main class="page"><div class="container"><div style="margin-bottom:17px"><a class="small" href="#/courses">← ${tr("back")}</a></div><div class="course-detail"><div><div class="panel"><span class="badge">${c.cat} • ${c.level}</span><h1 style="font:800 36px Manrope;margin:12px 0">${safe(courseName(c))}</h1><p style="color:#66758a">${safe(c.desc)}</p><div class="video" style="margin-top:20px"><iframe src="https://www.youtube.com/embed/${c.video}" title="${safe(c.title)}" allowfullscreen loading="lazy"></iframe></div></div><div class="panel lesson-list"><h3>${lang==="te"?"కోర్సు లెసన్స్":"Course Lessons"}</h3>${["Introduction & roadmap","Core concepts","Hands-on fundamentals","Real-world example","Practice challenge","Assessment & recap"].map((x,i)=>`<div class="lesson"><span>${en?"▶️":"🔒"}</span><span>${i+1}. ${lang==="te"?["పరిచయం & రోడ్‌మ్యాప్","ప్రాథమిక అంశాలు","ప్రాక్టికల్ ఫండమెంటల్స్","రియల్ వరల్డ్ ఉదాహరణ","ప్రాక్టీస్ ఛాలెంజ్","అసెస్‌మెంట్ & రీక్యాప్"][i]:x}</span>${en?`<button class="btn btn-light" onclick="complete(${c.id},${Math.round(((i+1)/6)*100)})">${tr("complete")}</button>`:""}</div>`).join("")}</div></div><aside><div class="panel"><div class="eyebrow gold-text">${tr("courseAccess")}</div><h2>₹${c.price.toLocaleString("en-IN")}</h2><p class="small" style="margin:6px 0 17px">${c.lessons} ${tr("lessons")} • ${lang==="te"?"లైఫ్‌టైమ్ యాక్సెస్":"Lifetime learning access"}</p>${en?`<div class="notice">✓ ${lang==="te"?"మీరు ఈ కోర్సులో ఎన్‌రోల్ అయ్యారు.":"You are enrolled in this course."}</div><div style="margin-top:18px"><div style="display:flex;justify-content:space-between;font-size:12px"><span>${tr("progress")}</span><b>${p}%</b></div><div class="progress" style="margin-top:6px"><i style="width:${p}%"></i></div></div>`:`<button class="btn btn-gold" style="width:100%" onclick="enrollCourse(${c.id})">${user?tr("enroll"):tr("loginEnroll")}</button>`}</div></aside></div></div></main>`)}
+function resourcesPage(){return layout(`<main class="page"><div class="container"><div class="section-head"><div><div class="eyebrow gold-text">${tr("resources")}</div><h1>${tr("resourcesTitle")}</h1></div><p>${lang==="te"?"ఉచిత గైడ్స్, టెంప్లేట్స్ మరియు కెరీర్ చెక్‌లిస్ట్స్.":"Free guides, templates and career checklists to support your learning."}</p></div><div class="resources">${resources.map(r=>`<div class="resource"><div style="font-size:28px">${r[0]}</div><h3>${lang==="te"?({"Resume Templates":"రెజ్యూమ్ టెంప్లేట్స్","Interview Checklist":"ఇంటర్వ్యూ చెక్‌లిస్ట్","Learning Roadmaps":"లెర్నింగ్ రోడ్‌మ్యాప్స్","Job Search Guide":"జాబ్ సెర్చ్ గైడ్","Skill Trackers":"స్కిల్ ట్రాకర్స్","Free Learning List":"ఉచిత లెర్నింగ్ లిస్ట్"}[r[1]]||r[1]):r[1]}</h3><p>${r[2]}</p><button class="btn btn-light" style="margin-top:14px" onclick="toast('${lang==="te"?"వనరు త్వరలో అందుబాటులో ఉంటుంది":"Resource will be connected here"}')">${lang==="te"?"త్వరలో":"Open Resource"}</button></div>`).join("")}</div><div class="panel" style="margin-top:25px"><h2 style="font:800 23px Manrope;margin-bottom:12px">${tr("faq")}</h2>${[["Are the courses available in Telugu?","Yes. The platform supports English and Telugu UI. Individual course content can be published in either language."],["Can I watch the lessons on YouTube?","Yes. Course lessons are designed to embed YouTube videos."],["How will student accounts work?","The current package includes a browser demo. Supabase integration should be enabled before real student data is collected."],["Can I add paid courses?","Yes. A payment gateway and server-side payment verification should be added before accepting real payments."]].map(x=>`<details class="faq"><summary>${lang==="te"?x[0]:x[0]}</summary><p>${x[1]}</p></details>`).join("")}</div></div></main>`)}
+function about(){return layout(`<main class="page"><div class="container"><div class="panel" style="padding:38px"><div class="eyebrow gold-text">${tr("about")}</div><h1 style="font:800 42px Manrope;margin-bottom:15px">${tr("aboutTitle")}</h1><p style="max-width:800px;font-size:17px;color:#627187">${tr("aboutText")}</p><div class="features" style="margin-top:28px"><div class="feature"><div class="icon">📚</div><h3>${tr("learnCard")}</h3><p>${tr("learnDesc")}</p></div><div class="feature"><div class="icon">🧩</div><h3>${tr("buildCard")}</h3><p>${tr("buildDesc")}</p></div><div class="feature"><div class="icon">🏆</div><h3>${tr("growCard")}</h3><p>${tr("growDesc")}</p></div></div></div></div></main>`)}
+function contact(){return layout(`<main class="page"><div class="container"><div class="form-wrap"><div class="panel"><div class="eyebrow gold-text">${tr("contact")}</div><h1 style="font:800 34px Manrope">${tr("contactTitle")}</h1><p class="small" style="margin:6px 0 20px">${tr("contactText")}</p><form class="form" onsubmit="event.preventDefault();toast('${lang==="te"?"ధన్యవాదాలు! మీ సందేశం డెమో కోసం రికార్డ్ చేయబడింది.":"Thanks! Your message was recorded for demo purposes."}');this.reset()"><label>${tr("name")}<input required placeholder="${tr("name")}"></label><label>${tr("email")}<input type="email" required placeholder="you@example.com"></label><label>${tr("message")}<textarea rows="5" required></textarea></label><button class="btn btn-primary">${tr("send")}</button></form><p class="small" style="margin-top:16px">Email: ${CFG.email||"hello@careeraxisacademy.in"}</p></div></div></div></main>`)}
+function login(){return layout(`<main class="page"><div class="form-wrap"><div class="panel"><div class="eyebrow gold-text">${tr("welcome")}</div><h1 style="font:800 34px Manrope;margin-bottom:20px">${tr("studentLogin")}</h1><form class="form" onsubmit="loginUser(event)"><label>${tr("email")}<input id="le" type="email" required></label><label>Password<input id="lp" type="password" minlength="4" required></label><button class="btn btn-primary">${tr("login")}</button></form><p class="small" style="text-align:center;margin-top:14px">${lang==="te"?"అకౌంట్ లేదా?":"No account?"} <a class="gold-text" href="#/signup">${tr("join")}</a></p></div></div></main>`)}
+function signup(){return layout(`<main class="page"><div class="form-wrap"><div class="panel"><div class="eyebrow gold-text">${tr("join")}</div><h1 style="font:800 34px Manrope;margin-bottom:20px">${tr("create")}</h1><form class="form" onsubmit="signupUser(event)"><label>${tr("name")}<input id="sn" required></label><label>${tr("email")}<input id="se" type="email" required></label><label>Password<input id="sp" type="password" minlength="4" required></label><button class="btn btn-gold">${tr("join")}</button></form><div class="notice" style="margin-top:18px">${tr("demoNotice")}</div></div></div></main>`)}
+function loginUser(e){e.preventDefault();user={name:document.getElementById("le").value.split("@")[0],email:document.getElementById("le").value};save();toast("Login successful");go("/dashboard")}
+function signupUser(e){e.preventDefault();user={name:document.getElementById("sn").value,email:document.getElementById("se").value};save();toast("Account created");go("/dashboard")}
+function logout(){user=null;save();go("/");toast("Logged out")}
+function enrollCourse(id){if(!user){go("/login");return}if(!enrolled.includes(Number(id)))enrolled.push(Number(id));save();toast("Course added");go("/course/"+id)}
+function complete(id,p){prog[id]=Math.max(prog[id]||0,p);save();toast("Progress updated");go("/course/"+id)}
+function dashboard(){if(!user){go("/login");return""}let ec=courses.filter(c=>isEn(c.id));let avg=ec.length?Math.round(ec.reduce((a,c)=>a+(prog[c.id]||0),0)/ec.length):0;return layout(`<main class="page"><div class="container"><div style="margin-bottom:23px"><div class="eyebrow gold-text">${tr("dashboard")}</div><h1 style="font:800 38px Manrope">${tr("welcome")}, ${safe(user.name)} 👋</h1></div><div class="dash-grid"><div class="dash-stat"><span class="small">${tr("enrolled")}</span><b>${ec.length}</b></div><div class="dash-stat"><span class="small">${tr("progress")}</span><b>${avg}%</b></div><div class="dash-stat"><span class="small">${tr("account")}</span><b style="font-size:17px;margin-top:7px">${safe(user.email)}</b></div></div><div class="panel" style="margin-top:20px"><div class="section-head" style="margin-bottom:10px"><h2 style="font:800 24px Manrope">${tr("myLearning")}</h2><a class="btn btn-primary" href="#/courses">${tr("browse")}</a></div>${ec.length?ec.map(c=>`<div class="lesson"><span style="font-size:26px">${c.icon}</span><div style="flex:1"><b>${safe(courseName(c))}</b><div class="progress" style="margin-top:7px"><i style="width:${prog[c.id]||0}%"></i></div><span class="small">${prog[c.id]||0}% ${tr("completed")}</span></div><a class="btn btn-light" href="#/course/${c.id}">${tr("continue")}</a></div>`).join(""):`<div class="empty">${lang==="te"?"మీరు ఇంకా ఏ కోర్సులోనూ ఎన్‌రోల్ కాలేదు.":"You haven't enrolled in a course yet."}<br><a class="btn btn-gold" style="margin-top:14px" href="#/courses">${tr("explore")}</a></div>`}</div></div></main>`)}
+function toggleLang(){lang=lang==="en"?"te":"en";document.body.classList.toggle("te",lang==="te");save();render()}
+function render(){document.body.classList.toggle("te",lang==="te");let h=location.hash.replace(/^#\/?/,""),p=h.split("/");let page=p[0]||"home";let html=page==="courses"?coursesPage():page==="course"?coursePage(p[1]):page==="resources"?resourcesPage():page==="about"?about():page==="contact"?contact():page==="login"?login():page==="signup"?signup():page==="dashboard"?dashboard():home();document.getElementById("app").innerHTML=html;window.scrollTo(0,0)}
+window.addEventListener("hashchange",render);render();
