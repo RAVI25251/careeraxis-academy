@@ -11,7 +11,7 @@ window.CAREERAXIS_CONFIG = Object.freeze({
     instagram: '',
     youtube: ''
   },
-  adminRoute: 'secure-panel',
+  adminRoute: 'admin',
   // Display/configuration only. Real authorization is enforced server-side by Supabase RLS.
   authorizedAdminEmails: [
     'careeraxisacademy@gmail.com',

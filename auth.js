@@ -89,9 +89,8 @@ async function signInWithGoogle() {
 
   // Return to the same origin that started the login. This makes local
   // development predictable while production returns to careeraxisacademy.in.
-  const route = AUTH_CONFIG.adminRoute || 'secure-panel';
-  const redirectOrigin = window.location.origin;
-  const redirectTo = `${redirectOrigin}/#${route}`;
+const redirectOrigin = window.location.origin;
+const redirectTo = `${redirectOrigin}/?admin=secure`;
 
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
