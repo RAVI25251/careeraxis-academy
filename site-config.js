@@ -1,21 +1,22 @@
-/* =========================================================
-   CAREERAXIS ACADEMY - EDIT THESE LINKS
-   Paste your real channel/profile URLs below.
-   ========================================================= */
-window.CAREERAXIS_CONFIG = {
-  brand: "CareerAxis Academy",
-  domain: "https://careeraxisacademy.in",
-  email: "hello@careeraxisacademy.in",
-
+window.CAREERAXIS_CONFIG = Object.freeze({
+  domain: 'https://careeraxisacademy.in',
+  email: 'careeraxisacademy@gmail.com',
+  supabaseUrl: 'https://gkkbvzgoqgzblecyhpfk.supabase.co',
+  supabaseAnonKey: 'sb_publishable_YOByxgRS-yBr9vCYldWu7w_M0V_wpmR',
+  youtubeChannelId: '',
+  youtubeChannelUrl: '',
   social: {
-    youtube: "",     // e.g. https://www.youtube.com/@YourChannel
-    instagram: "",   // e.g. https://www.instagram.com/YourPage/
-    telegram: ""     // e.g. https://t.me/YourChannel
+    telegram: '',
+    whatsapp: '',
+    instagram: '',
+    youtube: ''
   },
-
-  // Optional Supabase connection. Keep anon key only; NEVER put a service_role key here.
-  supabase: {
-    url: "",
-    anonKey: ""
-  }
-};
+  adminRoute: 'secure-panel',
+  // Display/configuration only. Real authorization is enforced server-side by Supabase RLS.
+  authorizedAdminEmails: [
+    'careeraxisacademy@gmail.com',
+    'ravitejasiddana@gmail.com'
+  ],
+  driveOwnerAccount: 'careeraxisacademy@gmail.com',
+  otpDestinationLabel: 'careeraxisacademy@gmail.com'
+});

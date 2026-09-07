@@ -1,0 +1,12 @@
+name: CareerAxis Automation
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+jobs:
+  scheduled-maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run maintenance placeholder
+        run: echo "Connect this workflow to protected Supabase Edge Functions for YouTube/Drive sync, job expiry, link checks and sitemap generation."

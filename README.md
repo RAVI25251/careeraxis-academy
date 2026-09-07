@@ -1,75 +1,45 @@
-# CareerAxis Academy — Full Website Platform
+# CareerAxis Academy — v3.3 Supabase Foundation
 
-Domain: https://careeraxisacademy.in
+This is the current working foundation for CareerAxis Academy. It is based on v3.1 Secure Admins and is intended to be connected to the Supabase project that has now been configured.
 
-## Frontend included
-- Premium responsive CareerAxis design inspired by the supplied reference screenshot
-- English + Telugu language switch
-- Home / Courses / Course details / Resources / About / Contact
-- Student signup/login demo
-- Student dashboard
-- Course enrollment
-- YouTube lesson embeds
-- Lesson progress tracking
-- FAQ
-- YouTube / Instagram / Telegram integration points
-- Mobile responsive navigation
-- GitHub Pages CNAME for careeraxisacademy.in
+**Do not push to GitHub until the Supabase connection, admin login, OTP, and Google Drive resource flow are tested.**
 
-## Social links
-Open `site-config.js` and paste your real:
-- YouTube URL
-- Instagram URL
-- Telegram URL
+See `docs/NEXT-STEPS.md` and `docs/SUPABASE-SETUP.md`.
 
-The UI will automatically show the links after you add them.
+# CareerAxis Academy v3 — Automated Career Platform
 
-## Important production note
-The included authentication is browser-only demo mode using localStorage.
-Do NOT use it to protect paid content or collect real student passwords.
+CareerAxis Academy is a free career/jobs/education information platform designed for GitHub Pages + Supabase + Google Drive + YouTube automation.
 
-For production:
-1. Create a Supabase project.
-2. Run `supabase-schema.sql`.
-3. Configure Supabase Auth.
-4. Replace the demo auth/data calls in `script.js` with Supabase queries.
-5. Add Row Level Security policies.
-6. Add server-side payment verification before accepting paid enrollments.
-7. Never place Supabase `service_role` keys in frontend code.
+## Admin security model
+The public site contains no admin link. Admin route: `#secure-panel`.
 
-## GitHub Pages
-Keep `CNAME` in the repository root:
-careeraxisacademy.in
+Only these two Google accounts are authorized:
+- careeraxisacademy@gmail.com
+- ravitejasiddana@gmail.com
 
-In GitHub:
-Settings → Pages → Deploy from branch → main → / (root)
+The login flow is:
+Google Sign-In → exact email allowlist → OTP to careeraxisacademy@gmail.com → Admin Dashboard.
 
-Then set Custom domain to:
-careeraxisacademy.in
+Real authorization must be enforced by Supabase RLS/server-side checks; the hidden route is not a security boundary by itself.
 
-## GoDaddy DNS for GitHub Pages
-At GoDaddy DNS, use:
-A @ 185.199.108.153
-A @ 185.199.109.153
-A @ 185.199.110.153
-A @ 185.199.111.153
+## Google Drive
+The production connector is restricted to the Google Drive account owned by careeraxisacademy@gmail.com. Keep OAuth refresh tokens and other secrets server-side.
 
-CNAME www RAVI25251.github.io
+## Included
+- YouTube-centric homepage
+- Jobs
+- Resources / Drive mapping architecture
+- Career paths
+- Calendar
+- Community links
+- English/Telugu-ready structure
+- Supabase schema and RLS foundation
+- Google auth admin gate
+- Two-admin allowlist
+- OTP Edge Function contract/starter
+- GitHub Actions automation starter
+- Admin SOP
+- Setup documentation
 
-Remove conflicting A/AAAA/CNAME records for the same host, but do not remove MX records used for email.
-
-After DNS and certificate provisioning, enable Enforce HTTPS.
-
-## Next production modules
-- Supabase Auth + profiles
-- Admin dashboard
-- Instructor dashboard
-- Real course CRUD
-- Real progress sync
-- Quizzes and question bank
-- Certificates
-- Razorpay/payment integration
-- Email notifications
-- Student support/tickets
-- Search engine SEO pages
-- Privacy policy / Terms / Refund policy
+## Important
+This package does not contain API keys, OAuth secrets or passwords. Complete `docs/SUPABASE-SETUP.md` before production use.
