@@ -127,7 +127,7 @@ async function verifyAdminOtp(code) {
     throw new Error('Admin authorization is required.');
   }
   const { data, error } = await sb.functions.invoke('admin-otp', {
-    body: { action: 'verify', code }
+    body: { action: 'verify', otp: code }
   });
   if (error) throw error;
   if (!data?.ok) throw new Error(data?.message || 'OTP verification failed.');
