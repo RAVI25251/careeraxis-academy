@@ -1,3 +1,8 @@
+/* =========================================================
+   CareerAxis Academy - Secure Admin Authentication
+   Google OAuth + Admin OTP
+   ========================================================= */
+
 const AUTH_CONFIG = window.CAREERAXIS_CONFIG || {};
 
 const AUTHORIZED_ADMIN_EMAILS = Object.freeze([
@@ -6,6 +11,8 @@ const AUTHORIZED_ADMIN_EMAILS = Object.freeze([
 ]);
 
 let supabaseClient = null;
+let supabaseModulePromise = null;
+
 let adminAuthState = {
   user: null,
   authorized: false
@@ -13,140 +20,51 @@ let adminAuthState = {
 
 let adminAuthInitPromise = null;
 let authListenerRegistered = false;
-let supabaseLoadPromise = null;
 
 
 /* =========================================================
    LOAD SUPABASE LIBRARY
    ========================================================= */
 
-function loadSupabaseLibrary() {
+async function loadSupabaseLibrary() {
 
   if (
     window.supabase &&
     typeof window.supabase.createClient === 'function'
   ) {
-    return Promise.resolve();
+    return window.supabase;
   }
 
-  if (supabaseLoadPromise) {
-    return supabaseLoadPromise;
+  if (supabaseModulePromise) {
+    return supabaseModulePromise;
   }
 
-  supabaseLoadPromise = new Promise(
-    (resolve, reject) => {
+  supabaseModulePromise = import(
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+  ).then((module) => {
 
-      const existing =
-        document.querySelector(
-          'script[data-careeraxis-supabase]'
-        );
+    /*
+      Make the module available globally so that app.js
+      can also use it.
+    */
 
-      if (existing) {
+    window.supabase = module;
 
-        const timer =
-          setInterval(() => {
+    return module;
 
-            if (
-              window.supabase &&
-              typeof window.supabase.createClient ===
-                'function'
-            ) {
+  }).catch((error) => {
 
-              clearInterval(timer);
-              resolve();
+    console.error(
+      'CareerAxis: Failed to load Supabase library.',
+      error
+    );
 
-            }
+    throw new Error(
+      'Unable to load Supabase JavaScript library.'
+    );
+  });
 
-          }, 50);
-
-
-        setTimeout(() => {
-
-          clearInterval(timer);
-
-          if (
-            window.supabase &&
-            typeof window.supabase.createClient ===
-              'function'
-          ) {
-
-            resolve();
-
-          } else {
-
-            reject(
-              new Error(
-                'Supabase library could not be loaded.'
-              )
-            );
-
-          }
-
-        }, 10000);
-
-        return;
-      }
-
-
-      const script =
-        document.createElement('script');
-
-
-      script.src =
-        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-
-
-      script.async = true;
-
-
-      script.dataset.careeraxisSupabase =
-        'true';
-
-
-      script.onload =
-        () => {
-
-          if (
-            window.supabase &&
-            typeof window.supabase.createClient ===
-              'function'
-          ) {
-
-            resolve();
-
-          } else {
-
-            reject(
-              new Error(
-                'Supabase library loaded incorrectly.'
-              )
-            );
-
-          }
-
-        };
-
-
-      script.onerror =
-        () => {
-
-          reject(
-            new Error(
-              'Unable to load Supabase library.'
-            )
-          );
-
-        };
-
-
-      document.head.appendChild(
-        script
-      );
-
-    }
-  );
-
-  return supabaseLoadPromise;
+  return supabaseModulePromise;
 }
 
 
@@ -154,55 +72,49 @@ function loadSupabaseLibrary() {
    GET SUPABASE CLIENT
    ========================================================= */
 
-function getSupabase() {
+async function getSupabase() {
 
   if (supabaseClient) {
     return supabaseClient;
   }
-
-
-  if (
-    !window.supabase ||
-    typeof window.supabase.createClient !==
-      'function'
-  ) {
-
-    return null;
-
-  }
-
 
   if (
     !AUTH_CONFIG.supabaseUrl ||
     !AUTH_CONFIG.supabaseAnonKey
   ) {
 
-    return null;
-
-  }
-
-
-  supabaseClient =
-    window.supabase.createClient(
-
-      AUTH_CONFIG.supabaseUrl,
-
-      AUTH_CONFIG.supabaseAnonKey,
-
-      {
-        auth: {
-
-          persistSession: true,
-
-          autoRefreshToken: true,
-
-          detectSessionInUrl: true
-
-        }
-      }
-
+    console.error(
+      'CareerAxis: Supabase configuration is missing.'
     );
 
+    return null;
+  }
+
+  const supabase = await loadSupabaseLibrary();
+
+  if (
+    !supabase ||
+    typeof supabase.createClient !== 'function'
+  ) {
+
+    console.error(
+      'CareerAxis: Supabase createClient is unavailable.'
+    );
+
+    return null;
+  }
+
+  supabaseClient = supabase.createClient(
+    AUTH_CONFIG.supabaseUrl,
+    AUTH_CONFIG.supabaseAnonKey,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
 
   return supabaseClient;
 }
@@ -212,25 +124,18 @@ function getSupabase() {
    AUTHORIZED ADMIN CHECK
    ========================================================= */
 
-function isAuthorizedEmail(
-  email
-) {
+function isAuthorizedEmail(email) {
 
   return AUTHORIZED_ADMIN_EMAILS.includes(
-
-    String(
-      email || ''
-    )
+    String(email || '')
       .trim()
       .toLowerCase()
-
   );
-
 }
 
 
 /* =========================================================
-   INITIALIZE ADMIN AUTHENTICATION
+   INITIALIZE ADMIN AUTH
    ========================================================= */
 
 async function initAdminAuth() {
@@ -239,163 +144,110 @@ async function initAdminAuth() {
     return adminAuthInitPromise;
   }
 
+  adminAuthInitPromise = (async () => {
 
-  adminAuthInitPromise =
-    (async () => {
+    const sb = await getSupabase();
 
-      /*
-       * Make absolutely sure Supabase has loaded
-       * before creating the client.
-       */
-
-      await loadSupabaseLibrary();
-
-
-      const sb =
-        getSupabase();
-
-
-      if (!sb) {
-
-        adminAuthState = {
-          user: null,
-          authorized: false
-        };
-
-
-        return {
-          configured: false,
-          ...adminAuthState
-        };
-
-      }
-
-
-      /*
-       * Safety check.
-       *
-       * This prevents the exact:
-       *
-       * Cannot read properties of undefined
-       * (reading 'onAuthStateChange')
-       *
-       * error.
-       */
-
-      if (
-        !sb.auth ||
-        typeof sb.auth.onAuthStateChange !==
-          'function'
-      ) {
-
-        throw new Error(
-          'Supabase Auth is not available. Please refresh the page and try again.'
-        );
-
-      }
-
-
-      /*
-       * Register the listener ONLY ONCE.
-       *
-       * Never call render() from this listener.
-       */
-
-      if (!authListenerRegistered) {
-
-        sb.auth.onAuthStateChange(
-          (
-            _event,
-            nextSession
-          ) => {
-
-            const nextUser =
-              nextSession?.user ||
-              null;
-
-
-            adminAuthState = {
-
-              user: nextUser,
-
-              authorized:
-                !!nextUser &&
-                isAuthorizedEmail(
-                  nextUser.email
-                )
-
-            };
-
-          }
-        );
-
-
-        authListenerRegistered =
-          true;
-
-      }
-
-
-      /*
-       * Read the existing browser session.
-       */
-
-      const {
-        data,
-        error
-      } =
-        await sb.auth.getSession();
-
-
-      if (error) {
-        throw error;
-      }
-
-
-      const user =
-        data?.session?.user ||
-        null;
-
+    if (!sb) {
 
       adminAuthState = {
-
-        user,
-
-        authorized:
-          !!user &&
-          isAuthorizedEmail(
-            user.email
-          )
-
+        user: null,
+        authorized: false
       };
-
 
       return {
-
-        configured: true,
-
+        configured: false,
         ...adminAuthState
-
       };
+    }
 
 
-    })()
-      .catch(
-        (error) => {
+    /* -----------------------------------------------------
+       Verify Supabase Auth
+       ----------------------------------------------------- */
 
-          /*
-           * Allow another attempt if initialization
-           * fails.
-           */
+    if (
+      !sb.auth ||
+      typeof sb.auth.getSession !== 'function'
+    ) {
 
-          adminAuthInitPromise =
-            null;
+      console.error(
+        'CareerAxis: Supabase Auth is unavailable.',
+        sb
+      );
 
-          throw error;
+      throw new Error(
+        'Supabase Auth is not available.'
+      );
+    }
+
+
+    /* -----------------------------------------------------
+       AUTH STATE LISTENER
+       ----------------------------------------------------- */
+
+    if (!authListenerRegistered) {
+
+      sb.auth.onAuthStateChange(
+        (_event, nextSession) => {
+
+          const nextUser =
+            nextSession?.user || null;
+
+          adminAuthState = {
+            user: nextUser,
+            authorized:
+              !!nextUser &&
+              isAuthorizedEmail(nextUser.email)
+          };
 
         }
       );
 
+      authListenerRegistered = true;
+    }
+
+
+    /* -----------------------------------------------------
+       GET CURRENT SESSION
+       ----------------------------------------------------- */
+
+    const {
+      data,
+      error
+    } = await sb.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
+
+    const user =
+      data?.session?.user || null;
+
+    adminAuthState = {
+      user,
+      authorized:
+        !!user &&
+        isAuthorizedEmail(user.email)
+    };
+
+
+    return {
+      configured: true,
+      ...adminAuthState
+    };
+
+  })().catch((error) => {
+
+    adminAuthInitPromise = null;
+
+    console.error(
+      'CareerAxis Admin Auth initialization failed:',
+      error
+    );
+
+    throw error;
+  });
 
   return adminAuthInitPromise;
 }
@@ -407,29 +259,28 @@ async function initAdminAuth() {
 
 async function signInWithGoogle() {
 
-  /*
-   * Make sure Supabase is loaded first.
-   */
-
-  await loadSupabaseLibrary();
-
-
-  const sb =
-    getSupabase();
-
+  const sb = await getSupabase();
 
   if (!sb) {
 
     throw new Error(
-      'Supabase is not configured yet. Complete SUPABASE-SETUP.md.'
+      'Supabase is not configured. Please check site-config.js.'
     );
+  }
 
+  if (
+    !sb.auth ||
+    typeof sb.auth.signInWithOAuth !== 'function'
+  ) {
+
+    throw new Error(
+      'Supabase Auth is not available.'
+    );
   }
 
 
   const redirectOrigin =
     window.location.origin;
-
 
   const redirectTo =
     `${redirectOrigin}/?admin=secure`;
@@ -437,24 +288,20 @@ async function signInWithGoogle() {
 
   const {
     error
-  } =
-    await sb.auth.signInWithOAuth({
+  } = await sb.auth.signInWithOAuth({
 
-      provider: 'google',
+    provider: 'google',
 
-      options: {
+    options: {
+      redirectTo
+    }
 
-        redirectTo
-
-      }
-
-    });
+  });
 
 
   if (error) {
     throw error;
   }
-
 }
 
 
@@ -464,23 +311,21 @@ async function signInWithGoogle() {
 
 async function signOutAdmin() {
 
-  const sb =
-    getSupabase();
+  const sb = await getSupabase();
 
-
-  if (sb) {
+  if (
+    sb &&
+    sb.auth &&
+    typeof sb.auth.signOut === 'function'
+  ) {
 
     await sb.auth.signOut();
-
   }
 
 
   adminAuthState = {
-
     user: null,
-
     authorized: false
-
   };
 
 
@@ -489,13 +334,8 @@ async function signOutAdmin() {
   );
 
 
-  /*
-   * Return to the public homepage.
-   */
-
   window.location.href =
     `${window.location.origin}/#home`;
-
 }
 
 
@@ -505,9 +345,7 @@ async function signOutAdmin() {
 
 async function requestAdminOtp() {
 
-  const sb =
-    getSupabase();
-
+  const sb = await getSupabase();
 
   if (
     !sb ||
@@ -517,22 +355,20 @@ async function requestAdminOtp() {
     throw new Error(
       'Admin authorization is required before requesting an OTP.'
     );
-
   }
 
 
   const {
     data,
     error
-  } =
-    await sb.functions.invoke(
-      'admin-otp',
-      {
-        body: {
-          action: 'request'
-        }
+  } = await sb.functions.invoke(
+    'admin-otp',
+    {
+      body: {
+        action: 'request'
       }
-    );
+    }
+  );
 
 
   if (error) {
@@ -546,7 +382,6 @@ async function requestAdminOtp() {
       data?.message ||
       'OTP request failed.'
     );
-
   }
 
 
@@ -558,13 +393,9 @@ async function requestAdminOtp() {
    VERIFY ADMIN OTP
    ========================================================= */
 
-async function verifyAdminOtp(
-  code
-) {
+async function verifyAdminOtp(code) {
 
-  const sb =
-    getSupabase();
-
+  const sb = await getSupabase();
 
   if (
     !sb ||
@@ -574,26 +405,21 @@ async function verifyAdminOtp(
     throw new Error(
       'Admin authorization is required.'
     );
-
   }
 
 
   const {
     data,
     error
-  } =
-    await sb.functions.invoke(
-      'admin-otp',
-      {
-        body: {
-
-          action: 'verify',
-
-          otp: code
-
-        }
+  } = await sb.functions.invoke(
+    'admin-otp',
+    {
+      body: {
+        action: 'verify',
+        otp: code
       }
-    );
+    }
+  );
 
 
   if (error) {
@@ -607,18 +433,12 @@ async function verifyAdminOtp(
       data?.message ||
       'OTP verification failed.'
     );
-
   }
 
 
   sessionStorage.setItem(
-
     'careeraxis_admin_otp_verified',
-
-    String(
-      Date.now()
-    )
-
+    String(Date.now())
   );
 
 
@@ -627,33 +447,24 @@ async function verifyAdminOtp(
 
 
 /* =========================================================
-   CHECK RECENT OTP
+   CHECK RECENT OTP VERIFICATION
    ========================================================= */
 
 function hasRecentOtpVerification() {
 
   const stamp =
     Number(
-
       sessionStorage.getItem(
         'careeraxis_admin_otp_verified'
       ) || 0
-
     );
 
 
   return (
-
     stamp > 0 &&
-
-    Date.now() -
-      stamp <
-      15 *
-      60 *
-      1000
-
+    Date.now() - stamp <
+      15 * 60 * 1000
   );
-
 }
 
 
@@ -682,9 +493,16 @@ window.CareerAxisAuth = {
   hasRecentOtpVerification,
 
   get state() {
-
     return adminAuthState;
-
   }
 
 };
+
+
+/* =========================================================
+   STARTUP
+   ========================================================= */
+
+console.log(
+  'CareerAxis: Secure authentication module loaded.'
+);
