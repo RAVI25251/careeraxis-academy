@@ -1122,35 +1122,42 @@ function ensureHomeRotationStyles() {
   style.id = 'careeraxis-home-rotation-style';
 
   style.textContent = `
-    .home-rotation-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 18px;
-      align-items: stretch;
-      width: 100%;
-    }
-
-    .home-rotation-grid .card {
-      min-width: 0;
-      height: 100%;
-      box-sizing: border-box;
-    }
-
-    @media (max-width: 1100px) {
+    /* Desktop/laptop only. Mobile keeps the existing site grid unchanged. */
+    @media (min-width: 1101px) {
       .home-rotation-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      /* 3 rotating cards + 1 fixed View All card */
+      .home-rotation-grid > .card:nth-child(n + 4):not(:last-child) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 761px) and (max-width: 1100px) {
+      .home-rotation-grid {
+        display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      /* 2 rotating cards + 1 fixed View All card */
+      .home-rotation-grid > .card:nth-child(n + 3):not(:last-child) {
+        display: none;
       }
     }
 
-    @media (max-width: 760px) {
-      .home-rotation-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 520px) {
-      .home-rotation-grid {
-        grid-template-columns: 1fr;
+    @media (min-width: 761px) {
+      .home-rotation-grid .card {
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
       }
     }
   `;
@@ -1230,7 +1237,7 @@ function initHomeRotations() {
       !Array.isArray(items) ||
       !renderer ||
       !config ||
-      items.length <= 4
+      items.length <= 2
     ) {
       return;
     }
