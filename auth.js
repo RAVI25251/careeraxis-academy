@@ -463,7 +463,7 @@ function hasRecentOtpVerification() {
   return (
     stamp > 0 &&
     Date.now() - stamp <
-      15 * 60 * 1000
+      60 * 60 * 1000
   );
 }
 
