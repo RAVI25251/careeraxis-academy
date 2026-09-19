@@ -489,6 +489,64 @@ function empty(msg) {
    JOB CARD
    ========================================================= */
 
+function homeJobCard(j) {
+
+  const url =
+    safeUrl(
+      j.applyUrl ||
+      j.apply_url ||
+      j.official_link ||
+      j.url
+    );
+
+  return `
+    <article class="card home-preview-card">
+
+      <span class="tag">
+        ${esc(j.category || j.job_category || 'Job')}
+      </span>
+
+      <div class="job-title home-card-title">
+        ${esc(j.title || j.name)}
+      </div>
+
+      <b>
+        ${esc(j.company || j.organization || '')}
+      </b>
+
+      <p class="muted home-card-description">
+        ${esc(j.location || 'India')}
+        ·
+        ${esc(j.qualification || j.eligibility || 'Check official notice')}
+      </p>
+
+      <p>
+        <b>Last date:</b>
+        ${esc(j.lastDate || j.last_date || 'Check official notice')}
+      </p>
+
+      <div class="home-card-actions">
+        ${
+          url !== '#'
+            ? `
+              <a
+                class="btn primary"
+                href="${esc(url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Apply Now →
+              </a>
+            `
+            : ''
+        }
+      </div>
+
+    </article>
+  `;
+}
+
+
 function jobCard(j) {
 
   const url =
@@ -499,69 +557,116 @@ function jobCard(j) {
       j.url
     );
 
+  const sourceUrl =
+    safeUrl(
+      j.sourceUrl ||
+      j.source_url
+    );
+
+  const details = [
+    ['Location', j.location],
+    ['Job Type', j.jobType || j.job_type],
+    ['Experience', j.experience],
+    ['Qualification', j.qualification || j.eligibility],
+    ['Skills', j.skills],
+    ['Salary', j.salary],
+    ['Last date', j.lastDate || j.last_date],
+    ['Status', j.status],
+    ['Featured', j.featured === true ? 'Yes' : j.featured === false ? 'No' : ''],
+  ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
 
   return `
     <article class="card">
 
       <span class="tag">
-        ${esc(
-          j.category ||
-          j.job_category ||
-          'Job'
-        )}
+        ${esc(j.category || j.job_category || 'Job')}
       </span>
 
       <div class="job-title">
-        ${esc(
-          j.title ||
-          j.name
-        )}
+        ${esc(j.title || j.name)}
       </div>
 
-      <b>
-        ${esc(
-          j.company ||
-          j.organization ||
-          ''
-        )}
-      </b>
-
-      <p class="muted">
-        ${esc(
-          j.location ||
-          'India'
-        )}
-        ·
-        ${esc(
-          j.qualification ||
-          j.eligibility ||
-          'Check official notice'
-        )}
-      </p>
-
-      <p>
-        <b>Last date:</b>
-        ${esc(
-          j.lastDate ||
-          j.last_date ||
-          'Check official notice'
-        )}
-      </p>
+      <p><b>Company / Organisation:</b> ${esc(j.company || j.organization || '')}</p>
 
       ${
-        url !== '#'
+        details.length
           ? `
-            <a
-              class="btn primary"
-              href="${esc(url)}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Apply / Official Link
-            </a>
+            <div style="display:grid;gap:8px;margin:14px 0">
+              ${details.map(([label,value]) => `
+                <div>
+                  <b>${esc(label)}:</b>
+                  <span>${esc(value)}</span>
+                </div>
+              `).join('')}
+            </div>
           `
           : ''
       }
+
+      ${
+        j.description
+          ? `
+            <div>
+              <b>Description</b>
+              <p class="muted">${esc(j.description)}</p>
+            </div>
+          `
+          : ''
+      }
+
+      ${
+        j.name_te
+          ? `
+            <div>
+              <b>Telugu title</b>
+              <p class="muted">${esc(j.name_te)}</p>
+            </div>
+          `
+          : ''
+      }
+
+      ${
+        j.description_te
+          ? `
+            <div>
+              <b>Telugu description</b>
+              <p class="muted">${esc(j.description_te)}</p>
+            </div>
+          `
+          : ''
+      }
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        ${
+          url !== '#'
+            ? `
+              <a
+                class="btn primary"
+                href="${esc(url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Apply / Official Link
+              </a>
+            `
+            : ''
+        }
+
+        ${
+          sourceUrl !== '#'
+            ? `
+              <a
+                class="btn secondary"
+                href="${esc(sourceUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Source
+              </a>
+            `
+            : ''
+        }
+      </div>
 
     </article>
   `;
@@ -792,6 +897,91 @@ function socialCard(
 
 function home() {
 
+  document.getElementById('home-rotation-styles')?.remove();
+
+  const homeStyle = document.createElement('style');
+  homeStyle.id = 'home-rotation-styles';
+  homeStyle.textContent = `
+    /* Desktop/laptop only. Mobile keeps the existing .grid behaviour. */
+    @media (min-width: 769px) {
+      .home-rotating-grid {
+        display: grid !important;
+        grid-auto-flow: column;
+        grid-template-rows: 1fr;
+        grid-auto-columns: minmax(0, 1fr);
+        overflow: hidden;
+        align-items: stretch;
+      }
+
+      .home-rotating-grid > .card {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (min-width: 1300px) {
+      .home-rotating-grid {
+        grid-auto-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1299px) {
+      .home-rotating-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+      }
+
+      .home-rotating-grid > .card:nth-child(n+4) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1300px) {
+      .home-rotating-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-auto-flow: column;
+      }
+
+      .home-rotating-grid > .card:nth-child(n+5) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .home-preview-card {
+        min-height: 390px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .home-preview-card .home-card-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 4.2em;
+      }
+
+      .home-preview-card .home-card-description {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .home-preview-card .home-card-actions {
+        margin-top: auto;
+      }
+
+      .home-cta-card {
+        justify-content: center;
+      }
+    }
+  `;
+  document.head.appendChild(homeStyle);
+
   $('#app').innerHTML = `
 
     <section class="hero">
@@ -853,7 +1043,7 @@ function home() {
       'Latest Jobs',
       'Current opportunities and official application links',
       data.jobs,
-      jobCard,
+      homeJobCard,
       'No published jobs yet.',
       'View All Job Updates →',
       '#jobs'
@@ -952,7 +1142,6 @@ function home() {
     </section>
   `;
 
-  ensureHomeRotationStyles();
   initHomeRotations();
 }
 
@@ -1021,6 +1210,7 @@ function renderRotatingCards(
 
       cards.push(
         renderer(item)
+          .replace('<article class="card">', '<article class="card home-preview-card">')
       );
     }
 
@@ -1030,7 +1220,7 @@ function renderRotatingCards(
     getSectionNoun(sectionTitle);
 
   cards.push(`
-    <article class="card">
+    <article class="card home-preview-card home-cta-card">
 
       <span class="tag">
         CareerAxis Academy
@@ -1095,7 +1285,7 @@ function rotatingSectionBlock(
 
       </div>
 
-      <div class="grid home-rotation-grid">
+      <div class="grid home-rotating-grid">
         ${renderRotatingCards(
           items,
           renderer,
@@ -1109,60 +1299,6 @@ function rotatingSectionBlock(
 
     </section>
   `;
-}
-
-
-function ensureHomeRotationStyles() {
-
-  if (document.getElementById('careeraxis-home-rotation-style')) {
-    return;
-  }
-
-  const style = document.createElement('style');
-  style.id = 'careeraxis-home-rotation-style';
-
-  style.textContent = `
-    /* Desktop/laptop only. Mobile keeps the existing site grid unchanged. */
-    @media (min-width: 1101px) {
-      .home-rotation-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 18px;
-        align-items: stretch;
-        width: 100%;
-      }
-
-      /* 3 rotating cards + 1 fixed View All card */
-      .home-rotation-grid > .card:nth-child(n + 4):not(:last-child) {
-        display: none;
-      }
-    }
-
-    @media (min-width: 761px) and (max-width: 1100px) {
-      .home-rotation-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
-        align-items: stretch;
-        width: 100%;
-      }
-
-      /* 2 rotating cards + 1 fixed View All card */
-      .home-rotation-grid > .card:nth-child(n + 3):not(:last-child) {
-        display: none;
-      }
-    }
-
-    @media (min-width: 761px) {
-      .home-rotation-grid .card {
-        min-width: 0;
-        height: 100%;
-        box-sizing: border-box;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
 }
 
 
@@ -1184,7 +1320,7 @@ function initHomeRotations() {
   };
 
   const rendererMap = {
-    'Latest Jobs': jobCard,
+    'Latest Jobs': homeJobCard,
     'Education Updates': infoCard,
     'Latest YouTube Videos': videoCard,
     'Latest Announcements': infoCard,
@@ -1237,7 +1373,7 @@ function initHomeRotations() {
       !Array.isArray(items) ||
       !renderer ||
       !config ||
-      items.length <= 2
+      items.length <= 4
     ) {
       return;
     }
