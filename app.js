@@ -891,12 +891,44 @@ function home() {
     </section>
 
 
-    ${sectionBlock(
-      'Latest Jobs',
-      'Current opportunities and official application links',
-      jobsList.map(jobCard).join('') ||
-      empty('No published jobs yet.')
-    )}
+${sectionBlock(
+  'Latest Jobs',
+  'Current opportunities and official application links',
+  jobsList.map(jobCard).join('') ||
+  empty('No published jobs yet.')
+)}
+
+<section class="section" style="padding-top:0">
+  <div
+    class="card"
+    style="
+      text-align:center;
+      padding:28px 24px;
+    "
+  >
+    <h3 style="margin:0 0 8px">
+      Looking for more job opportunities?
+    </h3>
+
+    <p
+      class="muted"
+      style="
+        margin:0 auto 18px;
+        max-width:720px;
+      "
+    >
+      Explore all the latest Government, PSU, Private, Engineering,
+      IT, Diploma and other job updates on our Jobs page.
+    </p>
+
+    <a
+      class="btn primary"
+      href="#jobs"
+    >
+      View All Job Updates →
+    </a>
+  </div>
+</section>
 
 
     ${sectionBlock(
