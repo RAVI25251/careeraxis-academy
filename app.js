@@ -158,32 +158,15 @@ async function readTable(table) {
   const sb = await getSupabase();
 
   if (!sb) {
-    return null;
-  }
-
-  let query =
-    sb
-      .from(table)
-      .select('*');
-
-  /*
-    Jobs are the primary public content source.
-    Load only published jobs and sort newest first.
-    This keeps the Home page and Jobs page aligned with
-    the Admin CMS records in public.jobs.
-  */
-  if (table === 'jobs') {
-    query = query
-      .eq('published', true)
-      .order('created_at', {
-        ascending: false
-      });
+    return [];
   }
 
   const {
     data: rows,
     error
-  } = await query;
+  } = await sb
+    .from(table)
+    .select('*');
 
   if (error) {
 
@@ -192,12 +175,7 @@ async function readTable(table) {
       error.message
     );
 
-    /*
-      null means the database request failed.
-      The caller can safely keep the local fallback
-      instead of confusing an error with an empty table.
-    */
-    return null;
+    return [];
   }
 
   return rows || [];
@@ -323,13 +301,7 @@ async function load() {
         const rows =
           await readTable(table);
 
-        /*
-          null = database request failed, so preserve the
-          local JSON fallback.
-          [] = database request succeeded and the table is
-          genuinely empty, so do not show stale local data.
-        */
-        if (rows !== null) {
+        if (rows.length) {
 
           data[key] =
             rows.filter(
@@ -404,15 +376,6 @@ function render() {
           location.hash.slice(1) ||
           'home'
         );
-
-
-  /*
-    Stop Home-page rotation timers whenever the user leaves
-    the Home route. A fresh set is created by home().
-  */
-  if (route !== 'home') {
-    clearHomeRotationTimers();
-  }
 
 
   if (
@@ -989,6 +952,7 @@ function home() {
     </section>
   `;
 
+  ensureHomeRotationStyles();
   initHomeRotations();
 }
 
@@ -1131,7 +1095,7 @@ function rotatingSectionBlock(
 
       </div>
 
-      <div class="grid">
+      <div class="grid home-rotation-grid">
         ${renderRotatingCards(
           items,
           renderer,
@@ -1145,6 +1109,53 @@ function rotatingSectionBlock(
 
     </section>
   `;
+}
+
+
+function ensureHomeRotationStyles() {
+
+  if (document.getElementById('careeraxis-home-rotation-style')) {
+    return;
+  }
+
+  const style = document.createElement('style');
+  style.id = 'careeraxis-home-rotation-style';
+
+  style.textContent = `
+    .home-rotation-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .home-rotation-grid .card {
+      min-width: 0;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 1100px) {
+      .home-rotation-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .home-rotation-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .home-rotation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
 }
 
 
@@ -1215,11 +1226,6 @@ function initHomeRotations() {
     const config =
       configMap[title];
 
-    /*
-      Four or fewer content items are shown together with
-      the permanent View All card. Rotation is needed only
-      when there is a fifth (or later) item to reveal.
-    */
     if (
       !Array.isArray(items) ||
       !renderer ||
@@ -1261,7 +1267,7 @@ function initHomeRotations() {
             title
           );
 
-      }, 8000);
+      }, 5000);
 
     homeRotationTimers.push(timer);
   });
