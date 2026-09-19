@@ -158,15 +158,32 @@ async function readTable(table) {
   const sb = await getSupabase();
 
   if (!sb) {
-    return [];
+    return null;
+  }
+
+  let query =
+    sb
+      .from(table)
+      .select('*');
+
+  /*
+    Jobs are the primary public content source.
+    Load only published jobs and sort newest first.
+    This keeps the Home page and Jobs page aligned with
+    the Admin CMS records in public.jobs.
+  */
+  if (table === 'jobs') {
+    query = query
+      .eq('published', true)
+      .order('created_at', {
+        ascending: false
+      });
   }
 
   const {
     data: rows,
     error
-  } = await sb
-    .from(table)
-    .select('*');
+  } = await query;
 
   if (error) {
 
@@ -175,7 +192,12 @@ async function readTable(table) {
       error.message
     );
 
-    return [];
+    /*
+      null means the database request failed.
+      The caller can safely keep the local fallback
+      instead of confusing an error with an empty table.
+    */
+    return null;
   }
 
   return rows || [];
@@ -301,7 +323,13 @@ async function load() {
         const rows =
           await readTable(table);
 
-        if (rows.length) {
+        /*
+          null = database request failed, so preserve the
+          local JSON fallback.
+          [] = database request succeeded and the table is
+          genuinely empty, so do not show stale local data.
+        */
+        if (rows !== null) {
 
           data[key] =
             rows.filter(
@@ -376,6 +404,15 @@ function render() {
           location.hash.slice(1) ||
           'home'
         );
+
+
+  /*
+    Stop Home-page rotation timers whenever the user leaves
+    the Home route. A fresh set is created by home().
+  */
+  if (route !== 'home') {
+    clearHomeRotationTimers();
+  }
 
 
   if (
@@ -1178,6 +1215,11 @@ function initHomeRotations() {
     const config =
       configMap[title];
 
+    /*
+      Four or fewer content items are shown together with
+      the permanent View All card. Rotation is needed only
+      when there is a fifth (or later) item to reveal.
+    */
     if (
       !Array.isArray(items) ||
       !renderer ||
