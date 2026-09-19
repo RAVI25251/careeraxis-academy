@@ -364,6 +364,8 @@ function navigate(route) {
 
 function render() {
 
+  clearHomeRotationTimers();
+
   const params =
     new URLSearchParams(
       location.search
@@ -406,6 +408,8 @@ function render() {
     papers,
 
     resources,
+
+    announcements,
 
     calendar,
 
@@ -489,64 +493,6 @@ function empty(msg) {
    JOB CARD
    ========================================================= */
 
-function homeJobCard(j) {
-
-  const url =
-    safeUrl(
-      j.applyUrl ||
-      j.apply_url ||
-      j.official_link ||
-      j.url
-    );
-
-  return `
-    <article class="card home-preview-card">
-
-      <span class="tag">
-        ${esc(j.category || j.job_category || 'Job')}
-      </span>
-
-      <div class="job-title home-card-title">
-        ${esc(j.title || j.name)}
-      </div>
-
-      <b>
-        ${esc(j.company || j.organization || '')}
-      </b>
-
-      <p class="muted home-card-description">
-        ${esc(j.location || 'India')}
-        ·
-        ${esc(j.qualification || j.eligibility || 'Check official notice')}
-      </p>
-
-      <p>
-        <b>Last date:</b>
-        ${esc(j.lastDate || j.last_date || 'Check official notice')}
-      </p>
-
-      <div class="home-card-actions">
-        ${
-          url !== '#'
-            ? `
-              <a
-                class="btn primary"
-                href="${esc(url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Apply Now →
-              </a>
-            `
-            : ''
-        }
-      </div>
-
-    </article>
-  `;
-}
-
-
 function jobCard(j) {
 
   const url =
@@ -557,116 +503,69 @@ function jobCard(j) {
       j.url
     );
 
-  const sourceUrl =
-    safeUrl(
-      j.sourceUrl ||
-      j.source_url
-    );
-
-  const details = [
-    ['Location', j.location],
-    ['Job Type', j.jobType || j.job_type],
-    ['Experience', j.experience],
-    ['Qualification', j.qualification || j.eligibility],
-    ['Skills', j.skills],
-    ['Salary', j.salary],
-    ['Last date', j.lastDate || j.last_date],
-    ['Status', j.status],
-    ['Featured', j.featured === true ? 'Yes' : j.featured === false ? 'No' : ''],
-  ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
 
   return `
     <article class="card">
 
       <span class="tag">
-        ${esc(j.category || j.job_category || 'Job')}
+        ${esc(
+          j.category ||
+          j.job_category ||
+          'Job'
+        )}
       </span>
 
       <div class="job-title">
-        ${esc(j.title || j.name)}
+        ${esc(
+          j.title ||
+          j.name
+        )}
       </div>
 
-      <p><b>Company / Organisation:</b> ${esc(j.company || j.organization || '')}</p>
+      <b>
+        ${esc(
+          j.company ||
+          j.organization ||
+          ''
+        )}
+      </b>
+
+      <p class="muted">
+        ${esc(
+          j.location ||
+          'India'
+        )}
+        ·
+        ${esc(
+          j.qualification ||
+          j.eligibility ||
+          'Check official notice'
+        )}
+      </p>
+
+      <p>
+        <b>Last date:</b>
+        ${esc(
+          j.lastDate ||
+          j.last_date ||
+          'Check official notice'
+        )}
+      </p>
 
       ${
-        details.length
+        url !== '#'
           ? `
-            <div style="display:grid;gap:8px;margin:14px 0">
-              ${details.map(([label,value]) => `
-                <div>
-                  <b>${esc(label)}:</b>
-                  <span>${esc(value)}</span>
-                </div>
-              `).join('')}
-            </div>
+            <a
+              class="btn primary"
+              href="${esc(url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Apply / Official Link
+            </a>
           `
           : ''
       }
-
-      ${
-        j.description
-          ? `
-            <div>
-              <b>Description</b>
-              <p class="muted">${esc(j.description)}</p>
-            </div>
-          `
-          : ''
-      }
-
-      ${
-        j.name_te
-          ? `
-            <div>
-              <b>Telugu title</b>
-              <p class="muted">${esc(j.name_te)}</p>
-            </div>
-          `
-          : ''
-      }
-
-      ${
-        j.description_te
-          ? `
-            <div>
-              <b>Telugu description</b>
-              <p class="muted">${esc(j.description_te)}</p>
-            </div>
-          `
-          : ''
-      }
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-        ${
-          url !== '#'
-            ? `
-              <a
-                class="btn primary"
-                href="${esc(url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Apply / Official Link
-              </a>
-            `
-            : ''
-        }
-
-        ${
-          sourceUrl !== '#'
-            ? `
-              <a
-                class="btn secondary"
-                href="${esc(sourceUrl)}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Source
-              </a>
-            `
-            : ''
-        }
-      </div>
 
     </article>
   `;
@@ -897,98 +796,6 @@ function socialCard(
 
 function home() {
 
-  document.getElementById('home-rotation-styles')?.remove();
-
-  const homeStyle = document.createElement('style');
-  homeStyle.id = 'home-rotation-styles';
-  homeStyle.textContent = `
-    /* Desktop/laptop only. Mobile keeps the existing .grid behaviour. */
-    @media (min-width: 769px) {
-      .home-rotating-grid {
-        display: grid !important;
-        grid-auto-flow: column;
-        grid-template-rows: 1fr;
-        grid-auto-columns: minmax(0, 1fr);
-        overflow: hidden;
-        align-items: stretch;
-      }
-
-      .home-rotating-grid > .card {
-        min-width: 0;
-        width: 100%;
-        box-sizing: border-box;
-      }
-    }
-
-    @media (min-width: 1300px) {
-      .home-rotating-grid {
-        grid-auto-columns: minmax(0, 1fr);
-      }
-    }
-
-    @media (min-width: 769px) and (max-width: 999px) {
-      .home-rotating-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-auto-flow: row;
-        grid-auto-columns: auto;
-      }
-    }
-
-    @media (min-width: 1000px) {
-      .home-rotating-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(0, 1fr);
-      }
-    }
-
-    @media (min-width: 769px) {
-      .home-preview-card {
-        min-height: 390px;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .home-preview-card .home-card-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 4.2em;
-      }
-
-      .home-preview-card .home-card-description {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-
-      .home-preview-card .home-card-actions {
-        margin-top: auto;
-      }
-
-      .home-cta-card {
-        justify-content: center;
-        text-align: center;
-        background:
-          linear-gradient(145deg, #fffaf0 0%, #fff1c7 100%);
-        border: 1px solid rgba(210, 164, 48, .45);
-        box-shadow: 0 10px 28px rgba(11, 33, 71, .08);
-      }
-
-      .home-cta-card .tag {
-        align-self: center;
-      }
-
-      .home-cta-card .btn {
-        align-self: center;
-        margin-top: 10px;
-      }
-    }
-  `;
-  document.head.appendChild(homeStyle);
-
   $('#app').innerHTML = `
 
     <section class="hero">
@@ -1017,17 +824,24 @@ function home() {
 
           <div class="actions">
 
-            <a class="btn primary" href="#jobs">
+            <a
+              class="btn primary"
+              href="#jobs"
+            >
               Explore Jobs
             </a>
 
-            <a class="btn secondary" href="#careers">
+            <a
+              class="btn secondary"
+              href="#careers"
+            >
               Explore Career Paths
             </a>
 
           </div>
 
         </div>
+
 
         <div class="hero-card">
 
@@ -1036,7 +850,12 @@ function home() {
             alt="CareerAxis Academy logo"
           >
 
-          <p style="text-align:center; margin:14px 0 0">
+          <p
+            style="
+              text-align:center;
+              margin:14px 0 0
+            "
+          >
             CareerAxis Academy
           </p>
 
@@ -1046,15 +865,17 @@ function home() {
 
     </section>
 
+
     ${rotatingSectionBlock(
       'Latest Jobs',
       'Current opportunities and official application links',
       data.jobs,
-      homeJobCard,
+      jobCard,
       'No published jobs yet.',
       'View All Job Updates →',
       '#jobs'
     )}
+
 
     ${rotatingSectionBlock(
       'Education Updates',
@@ -1066,6 +887,7 @@ function home() {
       '#education'
     )}
 
+
     ${rotatingSectionBlock(
       'Latest YouTube Videos',
       'Job updates and practical career guidance',
@@ -1075,6 +897,7 @@ function home() {
       'View All YouTube Videos →',
       '#youtube'
     )}
+
 
     ${rotatingSectionBlock(
       'Latest Announcements',
@@ -1086,6 +909,7 @@ function home() {
       '#announcements'
     )}
 
+
     ${rotatingSectionBlock(
       'Free Resources',
       'Preparation resources and previous papers',
@@ -1095,6 +919,7 @@ function home() {
       'View All Free Resources →',
       '#resources'
     )}
+
 
     <section class="section community">
 
@@ -1114,6 +939,7 @@ function home() {
 
       </div>
 
+
       <div class="socials">
 
         ${socialCard(
@@ -1131,30 +957,33 @@ function home() {
         )}
 
         ${socialCard(
-          'Instagram',
-          'Follow career and job updates',
-          'instagram',
-          '◎'
+          'WhatsApp',
+          'Join the community',
+          'whatsapp',
+          '◉'
         )}
 
         ${socialCard(
-          'WhatsApp',
-          'Get important job alerts',
-          'whatsapp',
-          '◉'
+          'Instagram',
+          'Follow CareerAxis Academy',
+          'instagram',
+          '◎'
         )}
 
       </div>
 
     </section>
+
   `;
 
+
   initHomeRotations();
+
 }
 
 
 /* =========================================================
-   HOME PAGE ROTATION
+   HOME PAGE ROTATING SECTIONS
    ========================================================= */
 
 function clearHomeRotationTimers() {
@@ -1164,121 +993,7 @@ function clearHomeRotationTimers() {
   );
 
   homeRotationTimers = [];
-}
 
-
-function getSectionNoun(label) {
-
-  const map = {
-    'Education Updates': 'education updates',
-    'Latest YouTube Videos': 'YouTube videos',
-    'Latest Announcements': 'announcements',
-    'Free Resources': 'free resources'
-  };
-
-  return map[label] || 'job updates';
-}
-
-
-function renderRotatingCards(
-  items,
-  renderer,
-  emptyMessage,
-  moreLabel,
-  moreHref,
-  startIndex = 0,
-  sectionTitle = ''
-) {
-
-  const list =
-    Array.isArray(items)
-      ? items
-      : [];
-
-  const count = list.length;
-
-  // Keep the 4th slot on the Latest Jobs row for the
-  // "Click Here for More Job Details" CTA card.
-  const visibleCount =
-    sectionTitle === 'Latest Jobs'
-      ? Math.min(3, count)
-      : Math.min(4, count);
-
-  const cards = [];
-
-  if (count) {
-
-    for (
-      let i = 0;
-      i < visibleCount;
-      i++
-    ) {
-
-      const item =
-        list[
-          (startIndex + i) % count
-        ];
-
-      cards.push(
-        renderer(item)
-          .replace('<article class="card">', '<article class="card home-preview-card">')
-      );
-    }
-
-  }
-
-  const noun =
-    getSectionNoun(sectionTitle);
-
-  cards.push(`
-    <article class="card home-preview-card home-cta-card">
-
-      ${
-        sectionTitle === 'Latest Jobs'
-          ? `<div
-              aria-hidden="true"
-              style="
-                font-size:30px;
-                line-height:1;
-                margin-bottom:12px;
-              "
-            >💼</div>`
-          : ''
-      }
-
-      <span class="tag">
-        ${sectionTitle === 'Latest Jobs' ? 'CAREER OPPORTUNITIES' : 'CareerAxis Academy'}
-      </span>
-
-      <div class="job-title">
-        ${esc(
-          sectionTitle === 'Latest Jobs'
-            ? 'Click Here for More Job Details'
-            : moreLabel
-        )}
-      </div>
-
-      <p class="muted">
-        ${esc(
-          count
-            ? sectionTitle === 'Latest Jobs'
-              ? 'Explore all the latest job opportunities across government, PSU, private sector, engineering, diploma, ITI and more.'
-              : `Explore all the latest ${noun}.`
-            : emptyMessage
-        )}
-      </p>
-
-      <a
-        class="btn primary"
-        href="${esc(moreHref)}"
-      >
-        ${sectionTitle === 'Latest Jobs' ? 'View All Jobs →' : 'View All →'}
-      </a>
-
-    </article>
-  `);
-
-  return cards.join('');
 }
 
 
@@ -1286,18 +1001,21 @@ function rotatingSectionBlock(
   title,
   subtitle,
   items,
-  renderer,
+  cardRenderer,
   emptyMessage,
   moreLabel,
   moreHref
 ) {
 
+  const safeItems =
+    Array.isArray(items)
+      ? items
+      : [];
+
+
   return `
-    <section
-      class="section"
-      data-rotating-section="true"
-      data-rotation-title="${esc(title)}"
-    >
+
+    <section class="section">
 
       <div class="section-head">
 
@@ -1315,135 +1033,314 @@ function rotatingSectionBlock(
 
       </div>
 
-      <div class="grid home-rotating-grid">
+
+      <div
+        class="grid"
+        data-rotating-section="true"
+        data-rotation-title="${esc(title)}"
+        style="
+          grid-template-columns:
+            repeat(auto-fit, minmax(220px, 1fr));
+        "
+      >
+
         ${renderRotatingCards(
-          items,
-          renderer,
+          safeItems,
+          cardRenderer,
           emptyMessage,
           moreLabel,
           moreHref,
-          0,
-          title
+          0
         )}
+
       </div>
 
     </section>
+
   `;
+
+}
+
+
+function renderRotatingCards(
+  items,
+  cardRenderer,
+  emptyMessage,
+  moreLabel,
+  moreHref,
+  startIndex
+) {
+
+  const count =
+    items.length;
+
+
+  let cards = '';
+
+
+  if (count > 0) {
+
+    const visibleCount =
+      Math.min(3, count);
+
+
+    for (
+      let offset = 0;
+      offset < visibleCount;
+      offset++
+    ) {
+
+      const index =
+        (startIndex + offset) % count;
+
+
+      cards +=
+        cardRenderer(items[index]);
+
+    }
+
+  }
+
+
+  const ctaDescription =
+    count > 0
+      ? `Explore all available ${esc(
+          getSectionNoun(moreLabel)
+        )} on CareerAxis Academy.`
+      : esc(emptyMessage);
+
+
+  cards += `
+
+    <article
+      class="card"
+      style="
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        text-align:center;
+        min-height:220px;
+      "
+    >
+
+      <span class="tag">
+        CareerAxis Academy
+      </span>
+
+      <div
+        class="job-title"
+        style="margin-top:10px"
+      >
+        ${esc(moreLabel)}
+      </div>
+
+      <p class="muted">
+        ${ctaDescription}
+      </p>
+
+      <a
+        class="btn primary"
+        href="${esc(moreHref)}"
+      >
+        View All →
+      </a>
+
+    </article>
+
+  `;
+
+
+  return cards;
+
+}
+
+
+function getSectionNoun(label) {
+
+  if (
+    label.includes('Education')
+  ) {
+    return 'education updates';
+
+  }
+
+  if (
+    label.includes('YouTube')
+  ) {
+    return 'YouTube videos';
+
+  }
+
+  if (
+    label.includes('Announcements')
+  ) {
+    return 'announcements';
+
+  }
+
+  if (
+    label.includes('Resources')
+  ) {
+    return 'free resources';
+
+  }
+
+  return 'job updates';
+
 }
 
 
 function initHomeRotations() {
-
-  clearHomeRotationTimers();
 
   const sections =
     document.querySelectorAll(
       '[data-rotating-section="true"]'
     );
 
-  const itemsMap = {
-    'Latest Jobs': data.jobs,
-    'Education Updates': data.education,
-    'Latest YouTube Videos': data.videos,
-    'Latest Announcements': data.announcements,
-    'Free Resources': data.resources
-  };
 
-  const rendererMap = {
-    'Latest Jobs': homeJobCard,
-    'Education Updates': infoCard,
-    'Latest YouTube Videos': videoCard,
-    'Latest Announcements': infoCard,
-    'Free Resources': resourceCard
-  };
+  sections.forEach(
+    section => {
 
-  const configMap = {
-    'Latest Jobs': [
-      'No published jobs yet.',
-      'View All Job Updates →',
-      '#jobs'
-    ],
-    'Education Updates': [
-      'No education updates yet.',
-      'View All Education Updates →',
-      '#education'
-    ],
-    'Latest YouTube Videos': [
-      'No YouTube videos published yet.',
-      'View All YouTube Videos →',
-      '#youtube'
-    ],
-    'Latest Announcements': [
-      'No announcements yet.',
-      'View All Announcements →',
-      '#announcements'
-    ],
-    'Free Resources': [
-      'No resources published yet.',
-      'View All Free Resources →',
-      '#resources'
-    ]
-  };
+      const title =
+        section.dataset.rotationTitle;
 
-  sections.forEach(section => {
 
-    const title =
-      section.dataset.rotationTitle;
+      const itemsMap = {
 
-    const items =
-      itemsMap[title] || [];
+        'Latest Jobs':
+          data.jobs,
 
-    const renderer =
-      rendererMap[title];
+        'Education Updates':
+          data.education,
 
-    const config =
-      configMap[title];
+        'Latest YouTube Videos':
+          data.videos,
 
-    if (
-      !Array.isArray(items) ||
-      !renderer ||
-      !config ||
-      items.length <= 4
-    ) {
-      return;
+        'Latest Announcements':
+          data.announcements,
+
+        'Free Resources':
+          data.resources
+
+      };
+
+
+      const rendererMap = {
+
+        'Latest Jobs':
+          jobCard,
+
+        'Education Updates':
+          infoCard,
+
+        'Latest YouTube Videos':
+          videoCard,
+
+        'Latest Announcements':
+          infoCard,
+
+        'Free Resources':
+          resourceCard
+
+      };
+
+
+      const configMap = {
+
+        'Latest Jobs': [
+          'No published jobs yet.',
+          'View All Job Updates →',
+          '#jobs'
+        ],
+
+        'Education Updates': [
+          'No education updates yet.',
+          'View All Education Updates →',
+          '#education'
+        ],
+
+        'Latest YouTube Videos': [
+          'No YouTube videos published yet.',
+          'View All YouTube Videos →',
+          '#youtube'
+        ],
+
+        'Latest Announcements': [
+          'No announcements yet.',
+          'View All Announcements →',
+          '#announcements'
+        ],
+
+        'Free Resources': [
+          'No resources published yet.',
+          'View All Free Resources →',
+          '#resources'
+        ]
+
+      };
+
+
+      const items =
+        itemsMap[title] || [];
+
+
+      const renderer =
+        rendererMap[title];
+
+
+      const config =
+        configMap[title];
+
+
+      if (
+        !Array.isArray(items) ||
+        !renderer ||
+        !config ||
+        items.length <= 3
+      ) {
+        return;
+      }
+
+
+      let startIndex = 0;
+
+
+      const timer =
+        setInterval(
+          () => {
+
+            if (
+              !document.body.contains(section)
+            ) {
+              return;
+            }
+
+
+            startIndex =
+              (startIndex + 1) %
+              items.length;
+
+
+            section.innerHTML =
+              renderRotatingCards(
+                items,
+                renderer,
+                config[0],
+                config[1],
+                config[2],
+                startIndex
+              );
+
+          },
+          8000
+        );
+
+
+      homeRotationTimers.push(timer);
+
     }
+  );
 
-    let startIndex = 0;
-
-    const timer =
-      setInterval(() => {
-
-        if (!document.body.contains(section)) {
-          clearInterval(timer);
-          return;
-        }
-
-        startIndex =
-          (startIndex + 1) % items.length;
-
-        const grid =
-          section.querySelector('.grid');
-
-        if (!grid) {
-          clearInterval(timer);
-          return;
-        }
-
-        grid.innerHTML =
-          renderRotatingCards(
-            items,
-            renderer,
-            config[0],
-            config[1],
-            config[2],
-            startIndex,
-            title
-          );
-
-      }, 5000);
-
-    homeRotationTimers.push(timer);
-  });
 }
 
 
@@ -1887,6 +1784,39 @@ function resources() {
 
       `
     );
+}
+
+
+/* =========================================================
+   ANNOUNCEMENTS
+   ========================================================= */
+
+function announcements() {
+
+  $('#app').innerHTML =
+    pageShell(
+      'Latest Announcements',
+      'Important CareerAxis Academy announcements and updates.',
+
+      `
+
+        <div class="grid">
+
+          ${
+            data.announcements
+              .map(infoCard)
+              .join('') ||
+
+            empty(
+              'No announcements yet.'
+            )
+          }
+
+        </div>
+
+      `
+    );
+
 }
 
 
