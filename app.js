@@ -926,26 +926,19 @@ function home() {
       }
     }
 
-    @media (min-width: 769px) and (max-width: 1299px) {
+    @media (min-width: 769px) and (max-width: 999px) {
       .home-rotating-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(0, 1fr);
-      }
-
-      .home-rotating-grid > .card:nth-child(n+4) {
-        display: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
       }
     }
 
-    @media (min-width: 1300px) {
+    @media (min-width: 1000px) {
       .home-rotating-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-auto-flow: column;
-      }
-
-      .home-rotating-grid > .card:nth-child(n+5) {
-        display: none;
+        grid-auto-columns: minmax(0, 1fr);
       }
     }
 
@@ -977,6 +970,20 @@ function home() {
 
       .home-cta-card {
         justify-content: center;
+        text-align: center;
+        background:
+          linear-gradient(145deg, #fffaf0 0%, #fff1c7 100%);
+        border: 1px solid rgba(210, 164, 48, .45);
+        box-shadow: 0 10px 28px rgba(11, 33, 71, .08);
+      }
+
+      .home-cta-card .tag {
+        align-self: center;
+      }
+
+      .home-cta-card .btn {
+        align-self: center;
+        margin-top: 10px;
       }
     }
   `;
@@ -1190,8 +1197,12 @@ function renderRotatingCards(
 
   const count = list.length;
 
+  // Keep the 4th slot on the Latest Jobs row for the
+  // "Click Here for More Job Details" CTA card.
   const visibleCount =
-    Math.min(4, count);
+    sectionTitle === 'Latest Jobs'
+      ? Math.min(3, count)
+      : Math.min(4, count);
 
   const cards = [];
 
@@ -1222,18 +1233,37 @@ function renderRotatingCards(
   cards.push(`
     <article class="card home-preview-card home-cta-card">
 
+      ${
+        sectionTitle === 'Latest Jobs'
+          ? `<div
+              aria-hidden="true"
+              style="
+                font-size:30px;
+                line-height:1;
+                margin-bottom:12px;
+              "
+            >💼</div>`
+          : ''
+      }
+
       <span class="tag">
-        CareerAxis Academy
+        ${sectionTitle === 'Latest Jobs' ? 'CAREER OPPORTUNITIES' : 'CareerAxis Academy'}
       </span>
 
       <div class="job-title">
-        ${esc(moreLabel)}
+        ${esc(
+          sectionTitle === 'Latest Jobs'
+            ? 'Click Here for More Job Details'
+            : moreLabel
+        )}
       </div>
 
       <p class="muted">
         ${esc(
           count
-            ? `Explore all the latest ${noun}.`
+            ? sectionTitle === 'Latest Jobs'
+              ? 'Explore all the latest job opportunities across government, PSU, private sector, engineering, diploma, ITI and more.'
+              : `Explore all the latest ${noun}.`
             : emptyMessage
         )}
       </p>
@@ -1242,7 +1272,7 @@ function renderRotatingCards(
         class="btn primary"
         href="${esc(moreHref)}"
       >
-        View All →
+        ${sectionTitle === 'Latest Jobs' ? 'View All Jobs →' : 'View All →'}
       </a>
 
     </article>
