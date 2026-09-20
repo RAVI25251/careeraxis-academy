@@ -1,14 +1,9 @@
 /* =========================================================
    CareerAxis Academy - Secure Admin Authentication
-   Google OAuth + Admin OTP
+   Google OAuth + Server-Side Admin Authorization + Admin OTP
    ========================================================= */
 
 const AUTH_CONFIG = window.CAREERAXIS_CONFIG || {};
-
-const AUTHORIZED_ADMIN_EMAILS = Object.freeze([
-  'careeraxisacademy@gmail.com',
-  'ravitejasiddana@gmail.com'
-]);
 
 let supabaseClient = null;
 let supabaseModulePromise = null;
@@ -27,7 +22,6 @@ let authListenerRegistered = false;
    ========================================================= */
 
 async function loadSupabaseLibrary() {
-
   if (
     window.supabase &&
     typeof window.supabase.createClient === 'function'
@@ -41,28 +35,28 @@ async function loadSupabaseLibrary() {
 
   supabaseModulePromise = import(
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-  ).then((module) => {
+  )
+    .then((module) => {
 
-    /*
-      Make the module available globally so that app.js
-      can also use it.
-    */
+      /*
+       * Make the module available globally so that app.js
+       * can also use it.
+       */
+      window.supabase = module;
 
-    window.supabase = module;
+      return module;
+    })
+    .catch((error) => {
 
-    return module;
+      console.error(
+        'CareerAxis: Failed to load Supabase library.',
+        error
+      );
 
-  }).catch((error) => {
-
-    console.error(
-      'CareerAxis: Failed to load Supabase library.',
-      error
-    );
-
-    throw new Error(
-      'Unable to load Supabase JavaScript library.'
-    );
-  });
+      throw new Error(
+        'Unable to load Supabase JavaScript library.'
+      );
+    });
 
   return supabaseModulePromise;
 }
@@ -121,16 +115,105 @@ async function getSupabase() {
 
 
 /* =========================================================
-   AUTHORIZED ADMIN CHECK
+   SERVER-SIDE ADMIN AUTHORIZATION
    ========================================================= */
 
-function isAuthorizedEmail(email) {
+/*
+ * IMPORTANT:
+ *
+ * Admin authorization is NOT determined by a hardcoded
+ * email list anymore.
+ *
+ * Supabase checks:
+ *
+ * auth.uid()
+ *     ↓
+ * admin_users.user_id
+ *     ↓
+ * role = 'admin'
+ *     ↓
+ * is_active = true
+ */
 
-  return AUTHORIZED_ADMIN_EMAILS.includes(
-    String(email || '')
-      .trim()
-      .toLowerCase()
-  );
+async function checkServerAdminAuthorization(sb, user) {
+
+  if (!sb || !user) {
+    return false;
+  }
+
+  if (
+    !sb.rpc ||
+    typeof sb.rpc !== 'function'
+  ) {
+
+    console.error(
+      'CareerAxis: Supabase RPC is unavailable.'
+    );
+
+    return false;
+  }
+
+  try {
+
+    const {
+      data,
+      error
+    } = await sb.rpc(
+      'is_current_admin'
+    );
+
+    if (error) {
+
+      console.error(
+        'CareerAxis: Server-side admin authorization failed.',
+        error
+      );
+
+      return false;
+    }
+
+    return data === true;
+
+  } catch (error) {
+
+    console.error(
+      'CareerAxis: Unexpected admin authorization error.',
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   UPDATE ADMIN AUTH STATE
+   ========================================================= */
+
+async function updateAdminAuthState(sb, user) {
+
+  if (!user) {
+
+    adminAuthState = {
+      user: null,
+      authorized: false
+    };
+
+    return adminAuthState;
+  }
+
+  const authorized =
+    await checkServerAdminAuthorization(
+      sb,
+      user
+    );
+
+  adminAuthState = {
+    user,
+    authorized
+  };
+
+  return adminAuthState;
 }
 
 
@@ -163,7 +246,7 @@ async function initAdminAuth() {
 
 
     /* -----------------------------------------------------
-       Verify Supabase Auth
+       VERIFY SUPABASE AUTH
        ----------------------------------------------------- */
 
     if (
@@ -189,18 +272,42 @@ async function initAdminAuth() {
     if (!authListenerRegistered) {
 
       sb.auth.onAuthStateChange(
-        (_event, nextSession) => {
+        (event, nextSession) => {
 
           const nextUser =
             nextSession?.user || null;
 
-          adminAuthState = {
-            user: nextUser,
-            authorized:
-              !!nextUser &&
-              isAuthorizedEmail(nextUser.email)
-          };
+          /*
+           * Do not perform the RPC directly inside the
+           * Supabase auth callback.
+           *
+           * Defer it slightly so the auth state transition
+           * can complete safely.
+           */
 
+          setTimeout(async () => {
+
+            try {
+
+              await updateAdminAuthState(
+                sb,
+                nextUser
+              );
+
+            } catch (error) {
+
+              console.error(
+                'CareerAxis: Failed to update admin auth state.',
+                error
+              );
+
+              adminAuthState = {
+                user: nextUser,
+                authorized: false
+              };
+            }
+
+          }, 0);
         }
       );
 
@@ -224,12 +331,15 @@ async function initAdminAuth() {
     const user =
       data?.session?.user || null;
 
-    adminAuthState = {
-      user,
-      authorized:
-        !!user &&
-        isAuthorizedEmail(user.email)
-    };
+
+    /* -----------------------------------------------------
+       SERVER-SIDE ADMIN CHECK
+       ----------------------------------------------------- */
+
+    await updateAdminAuthState(
+      sb,
+      user
+    );
 
 
     return {
@@ -474,13 +584,9 @@ function hasRecentOtpVerification() {
 
 window.CareerAxisAuth = {
 
-  AUTHORIZED_ADMIN_EMAILS,
-
   getSupabase,
 
   initAdminAuth,
-
-  isAuthorizedEmail,
 
   signInWithGoogle,
 
