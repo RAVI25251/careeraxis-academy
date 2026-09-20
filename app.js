@@ -2810,29 +2810,20 @@ async function admin() {
 
   if (!state.authorized) {
 
-    $('#app').innerHTML =
-      pageShell(
-        'Access Denied',
-        '',
+  $('#app').innerHTML =
+    pageShell(
+      'Access Denied',
+      '',
 
-        `
+      `
+        <div class="empty">
+          You are not authorized to access the administration panel.
+        </div>
+      `
+    );
 
-          <div class="empty">
-
-            ${esc(
-              state.user.email
-            )}
-
-            is not authorized.
-
-          </div>
-
-        `
-      );
-
-    return;
-  }
-
+  return;
+}
 
   if (
     !auth.hasRecentOtpVerification()
