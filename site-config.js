@@ -8,8 +8,8 @@ window.CAREERAXIS_CONFIG = Object.freeze({
   social: {
     telegram: '',
     whatsapp: '',
-    instagram: '',
-    youtube: ''
+    instagram: 'https://www.instagram.com/careeraxisacademy/',
+    youtube: 'https://www.youtube.com/@CareerAxisAcademy'
   },
   adminRoute: 'admin',
   // Display/configuration only. Real authorization is enforced server-side by Supabase RLS.
