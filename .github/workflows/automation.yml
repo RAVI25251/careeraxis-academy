@@ -1,12 +1,72 @@
 name: CareerAxis Automation
+
+# 09:00 IST = 03:30 UTC, 18:00 IST = 12:30 UTC
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '30 3 * * *'
+    - cron: '30 12 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write   # commit the generated job pages and sitemap
+  pages: write      # ask GitHub Pages to rebuild
+
+concurrency:
+  group: careeraxis-automation
+  cancel-in-progress: false
+
 jobs:
-  scheduled-maintenance:
+  update-site:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Run maintenance placeholder
-        run: echo "Connect this workflow to protected Supabase Edge Functions for YouTube/Drive sync, job expiry, link checks and sitemap generation."
+
+      - name: Run job updater (expire old jobs, optional AI collection)
+        env:
+          JOB_UPDATER_URL: ${{ secrets.JOB_UPDATER_URL }}
+          AUTOMATION_SECRET: ${{ secrets.AUTOMATION_SECRET }}
+        run: |
+          if [ -z "$JOB_UPDATER_URL" ] || [ -z "$AUTOMATION_SECRET" ]; then
+            echo "::warning::JOB_UPDATER_URL / AUTOMATION_SECRET are not set - skipping the job updater."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --retry 2 --max-time 150 \
+            -X POST "$JOB_UPDATER_URL" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Secret: $AUTOMATION_SECRET" \
+            -d '{"trigger":"${{ github.event_name }}"}'
+          echo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Runs even if the updater failed, so pages and sitemap always match the database.
+      - name: Generate job pages, jobs list and sitemap
+        if: ${{ !cancelled() }}
+        run: node scripts/generate-seo.mjs
+
+      - name: Commit generated files
+        id: commit
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name  "careeraxis-bot"
+          git config user.email "careeraxis-bot@users.noreply.github.com"
+          git add -A jobs sitemap.xml index.html
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to publish."
+          else
+            git commit -m "chore: update job pages and sitemap [skip ci]"
+            git pull --rebase --autostash
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger GitHub Pages build
+        if: ${{ steps.commit.outputs.changed == 'true' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds"
